@@ -1,3 +1,8 @@
+"""
+20/01/2020 - This module is here just as an example;
+it is a copy of the module with the same in the "commons" application
+"""
+
 from pybb.models import Forum, Topic, Post
 from zinnia.models import Entry
 from django_messages.models import Message # 190414 GT: added custom activity type private-message
