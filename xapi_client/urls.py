@@ -1,6 +1,6 @@
 from django.conf.urls import url
-from django.contrib import admin
-
+from xapi_client.track.views import SelfRecord
 
 urlpatterns = [
+    url(r'^record/$', SelfRecord.as_view(), name='xapi_self_record'),
 ]

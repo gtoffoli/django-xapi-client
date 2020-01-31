@@ -1,3 +1,6 @@
+# This module is still too dependent on being originated by CommonSpaces!
+# ASAP it should be made more generic.
+
 from importlib import import_module
 import uuid
 from tincan import (
@@ -15,44 +18,15 @@ from tincan import (
 from django.core.exceptions import ImproperlyConfigured
 from django.conf import settings
 
-vocabulary_module = import_module(settings.XAPI_VOCABULARIES_MODULE)
-xapi_verbs = getattr(vocabulary_module, 'xapi_verbs')
-xapi_activities = getattr(vocabulary_module, 'xapi_activities')
-XAPI_PLATFORM = settings.XAPI_DEFAULT_PLATFORM
-XAPI_LANGUAGE = settings.LANGUAGE_CODE
-
+from xapi_client.utils import get_current_language
+from xapi_client.utils import xapi_activities, xapi_verbs
+# aliases were introduced for compatibility with CommonSpaces
+from xapi_client.utils import XAPI_ACTIVITY_ALIASES, XAPI_VERB_ALIASES
 try:
-    from datatrans.utils import get_current_language
+    XAPI_PLATFORM = settings.XAPI_DEFAULT_PLATFORM
 except:
-    from django.utils import translation
-
-    def get_default_language():
-        """
-        Get the source language code if specified, else just the default language code.
-        """
-        lang = getattr(settings, 'SOURCE_LANGUAGE_CODE', settings.LANGUAGE_CODE)
-        default = [l[0] for l in settings.LANGUAGES if l[0] == lang]
-        if len(default) == 0:
-            # when not found, take first part ('en' instead of 'en-us')
-            lang = lang.split('-')[0]
-            default = [l[0] for l in settings.LANGUAGES if l[0] == lang]
-        if len(default) == 0:
-            raise ImproperlyConfigured("The [SOURCE_]LANGUAGE_CODE '%s' is not found in your LANGUAGES setting." % lang)
-        return default[0]
-
-    def get_current_language():
-        """
-        Get the current language
-        """
-        lang = translation.get_language() or 'en'
-        current = [l[0] for l in settings.LANGUAGES if l[0] == lang]
-        if len(current) == 0:
-            lang = lang.split('-')[0]
-            current = [l[0] for l in settings.LANGUAGES if l[0] == lang]
-        if len(current) == 0:
-            # Fallback to default language code
-            return get_default_language()
-        return current[0]
+    XAPI_PLATFORM = 'unspecified platform'
+XAPI_LANGUAGE = settings.LANGUAGE_CODE
 
 def get_name(obj):
     return hasattr(obj, '__str__') and obj.__str__() or ''
@@ -90,6 +64,7 @@ def get_object_id(request, object):
 
 def get_context_parent(request, target):
     target_type = target.__class__.__name__
+    target_type = XAPI_ACTIVITY_ALIASES.get(target_type, target_type) # for compatibility with CommonSpaces
     return {
        'objectType': 'Activity',
        'id': get_object_id(request, target),
@@ -98,6 +73,7 @@ def get_context_parent(request, target):
 
 def get_context_grouping(request, target):
     target_type = target.__class__.__name__
+    target_type = XAPI_ACTIVITY_ALIASES.get(target_type, target_type) # for compatibility with CommonSpaces
     return {
        'objectType': 'Activity',
        'id': get_object_id(request, target),
@@ -122,12 +98,14 @@ def put_statement(request, user, verb, object, target, language=XAPI_LANGUAGE):
     )
 
     # construct the verb of the statement
+    verb = XAPI_VERB_ALIASES.get(verb, verb) # for compatibility with CommonSpaces
     verb = Verb(
         id=xapi_verbs[verb]['id'],
         display=LanguageMap(**xapi_verbs[verb]['display']),
     )
 
     action = object.__class__.__name__
+    action = XAPI_ACTIVITY_ALIASES.get(action, action) # for compatibility with CommonSpaces
     activity_type = xapi_activities[action]['type']
     object_id = get_object_id(request, object) # 190307 GT: defined get_object_id
     object_name = get_name(object) # 190307 GT: defined get_name
@@ -157,14 +135,15 @@ def put_statement(request, user, verb, object, target, language=XAPI_LANGUAGE):
             context_activities['parent'] = {
                'objectType': 'Activity',
                'id': get_object_id(request, target),
-               'definition': {'type': xapi_activities[target_type]['type'], 'name': {'en': get_name(target)}}
+               'definition': {'type': xapi_activities[XAPI_ACTIVITY_ALIASES.get(target_type, target_type)]['type'], 'name': {'en': get_name(target)}}
             }
             if target_type == 'Folder':
                 project = target.get_project()
                 if project:
                     context_activities['grouping'] = get_context_grouping(request, project)
             elif target_type == 'Forum':
-                project = target.forum_get_project()
+                # project = target.forum_get_project()
+                project = target.get_project()
                 if project:
                     context_activities['grouping'] = get_context_grouping(request, project)
             elif target_type == 'LearningPath':
@@ -183,7 +162,6 @@ def put_statement(request, user, verb, object, target, language=XAPI_LANGUAGE):
         object=object,
         context=context,
     )
-    # print (statement.to_json(lrs.version))
 
     # save our statement to the remote_lrs and store the response in 'response'
     response = lrs.save_statement(statement)

@@ -1,0 +1,37 @@
+{% extends "commons_base.html" %}
+{% load staticfiles i18n %}
+
+{% block head_title %}{% trans "Record eXperience" %}{% endblock head_title %}
+
+{% block body %}
+
+<h1>{% trans "Record non-formal eXperience in Learning Record Store as an xAPI statement" %}</h1>
+
+    <section>
+
+	<form action="" method="post" class="form-horizontal">{% csrf_token %}
+
+    {% for field in form.hidden_fields %}{{ field }}{% endfor %}
+    <fieldset class="padding1020">
+    {% if form.errors %}
+      {% if form.non_field_errors %}
+      <div class="txt-error demiBold" style="margin-left:-20px">
+        {{ form.non_field_errors }}
+      </div>
+      {% endif %}
+   	{% endif %}
+    {% for field in form.visible_fields %}
+      <div class="form-group">
+        <label for="{{ field.name }}" {% if field.field.required %}class="required"{% endif %}>{{ field.label|capfirst}}</label>
+        <span class="txt-error">{{ field.errors }}</span>{{ field }}
+        {% if field.help_text %}<small id="{{ field.name }}helpBlock" class="help-block">{{ field.help_text }}</small>{% endif %}
+      </div>
+    {% endfor %}
+
+	<input type="submit" name="refresh" value="" style="visibility: hidden;" />
+	<input type="submit" name="send" value="{% trans "Send statement" %} &raquo;" />
+	</form>
+
+    </section>
+
+{% endblock %}
