@@ -162,7 +162,7 @@ def put_statement(request, user, verb, object, target, language=XAPI_LANGUAGE):
         object=object,
         context=context,
     )
-
+    """
     # save our statement to the remote_lrs and store the response in 'response'
     response = lrs.save_statement(statement)
 
@@ -181,3 +181,27 @@ def put_statement(request, user, verb, object, target, language=XAPI_LANGUAGE):
         raise ValueError("statement could not be retrieved")
 
     return response.success
+    """
+    return send_statement(statement)
+
+def send_statement(statement):
+    # construct an LRS
+    lrs = RemoteLRS(
+        version = settings.LRS_VERSION,
+        endpoint = settings.LRS_ENDPOINT,
+        auth = settings.LRS_AUTH,
+    )
+    # save our statement to the remote_lrs and store the response in 'response'
+    lrs_response = lrs.save_statement(statement)
+    if not lrs_response:
+        result = "statement failed to save"
+    elif not lrs_response.success:
+        result = lrs_response.data
+    else:
+        # retrieve our statement from the remote_lrs using the id returned in the response
+        lrs_response = lrs.retrieve_statement(lrs_response.content.id)
+        if lrs_response.success:
+            result = lrs_response.content
+        else:
+            result = lrs_response.data
+    return result

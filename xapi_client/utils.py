@@ -1,6 +1,8 @@
 from importlib import import_module
 
 from django.conf import settings
+from django.core.validators import URLValidator
+from django.core.exceptions import ValidationError
 
 vocabulary_module = None
 try:
@@ -11,7 +13,7 @@ try:
 except:
     pass
 if not vocabulary_module:
-    from xapi_client.xapi_vocabularies import xapi_activities, xapi_verbs, xapi_recipes
+    from xapi_client.xapi_vocabularies import xapi_activities, xapi_verbs, xapi_recipes, xapi_contextual_activities
 try:
     XAPI_PLATFORM = settings.XAPI_DEFAULT_PLATFORM
 except:
@@ -120,3 +122,30 @@ def get_verb_choices(recipe_ids=None):
 
 def get_recipe_choices():
     return [[key, key] for key in xapi_recipes.keys()]
+
+def get_contextual_activity_choices():
+    contextual_activity_choices = []
+    for key in xapi_contextual_activities:
+        name = key
+        value = xapi_activities[key]
+        activity_type = value['type']
+        for language_code, activity_display in value.get('display', {}).items():
+            if language_code[:2] == current_language:
+                name = activity_display
+                break
+        contextual_activity_choices.append([activity_type, name])
+    return contextual_activity_choices
+
+def make_uri(text):  
+    # return 'http://cs.eu/{}'.format(hashlib.md5(text.encode()).digest())
+    validate = URLValidator()
+    try:
+        validate(text)
+        return text
+    except ValidationError:
+        out = ''
+        for c in text:
+            if not c.isalnum() and not c in '-._~':
+                c = '_'
+            out += c
+        return 'http://cs.eu/{}'.format(out)

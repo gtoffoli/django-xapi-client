@@ -95,6 +95,9 @@ xapi_activities = {
     'folder': {'type': 'http://activitystrea.ms/schema/1.0/collection',
         'display': {"en-US": "folder", "it": "cartella"},
     },
+    'collection': {'type': 'http://activitystrea.ms/schema/1.0/collection',
+        'display': {"en-US": "collection", "it": "raccolta"},
+    },
     'document': {'type': 'http://activitystrea.ms/schema/1.0/file',
         'display': {"en-US": "document", "it": "documento"},
     },
@@ -329,3 +332,27 @@ xapi_recipes = {
         'comment': 'this recipe mainly concerns formal and non-formal education',
     },
 }
+
+xapi_contextual_activities = ['project', 'course', 'learning path', 'folder', 'collection', 'resource repository', 'event', 'place',]
+
+xapi_language_codes = [
+    ('en', 'English'),
+    ('it', 'Italian'),
+    ('pt', 'Portuguese'),
+    ('de', 'German'),
+    ('el', 'Greek'),
+    ('es', 'Spanish'),
+    ('fr', 'French'),
+    ('hu', 'Hungarian'),
+    ('lt', 'Lithuanian'),
+    ('nl', 'Dutch'),
+    ('pl', 'Polish'),
+]
+
+xapi_verbs_by_id = {}
+for key, value in xapi_verbs.items():
+    xapi_verbs_by_id[value['id']] = value
+
+xapi_activities_by_type = {}
+for key, value in xapi_activities.items():
+    xapi_activities_by_type[value['type']] = value

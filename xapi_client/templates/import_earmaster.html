@@ -1,25 +1,29 @@
 {% extends "commons_base.html" %}
 {% load staticfiles i18n %}
 
-{% block head_title %}{% trans "Record eXperience" %}{% endblock head_title %}
+{% block head_title %}{% trans "EarMaster logs" %}{% endblock head_title %}
 
 {% block body %}
 
-<h1>{% trans "Record non-formal eXperience in Learning Record Store as an xAPI statement" %}</h1>
+<h1>{% trans "Import EarMaster logs and record them in a LRS as an xAPI statements" %}</h1>
 
-    {% if result %}
+{% if keys and rows %}
+	<h4 style="text-align:center;">{% trans "Log just imported" %}</h4>
+	<table class="table table-bordered table-striped">
+		<thead>{% for key in keys %}<th style="text-align:center; font-size:small;">{{ key }}</th>{% endfor %}</thead>
+		<tbody>
+		{% for row in rows %}
+			<tr>{% for value in row %}<td style="text-align:center; font-size:small;">{{ value }}</td>{% endfor %}</tr>
+		{% endfor %}
+		</tbody>
+	</table>
+{% endif %}
+
+	<h4 style="text-align:center;">{% trans "Import new log" %}</h4>
+
     <section>
-	<h4 style="text-align:center;">{% trans "Statement just sent" %}</h4>
 
-		<div>{{ result }}</div>
-
-    </section>
-   	{% endif %}
-
-    <section>
-	<h4 style="text-align:center;">{% trans "Send new statement" %}</h4>
-
-	<form action="" method="post" class="form-horizontal">{% csrf_token %}
+	<form method="post" enctype="multipart/form-data" action="" class="form-horizontal">{% csrf_token %}
 
     {% for field in form.hidden_fields %}{{ field }}{% endfor %}
     <fieldset class="padding1020">
@@ -38,8 +42,7 @@
       </div>
     {% endfor %}
 
-	<input type="submit" name="refresh" value="" style="visibility: hidden;" />
-	<input type="submit" name="send" value="{% trans "Send statement" %} &raquo;" />
+	<input type="submit" name="import" value="{% trans "Import and send" %} &raquo;" />
 	</form>
 
     </section>
