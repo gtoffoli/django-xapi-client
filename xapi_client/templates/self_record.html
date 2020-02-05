@@ -5,13 +5,14 @@
 
 {% block body %}
 
-<h1>{% trans "Record non-formal eXperience in Learning Record Store as an xAPI statement" %}</h1>
+<h1 style="text-align:center;">{% trans "Record any eXperience in the xAPI Learning Record Store" %}
+	{% if PROJECT_TITLE %}{% trans "of" %}{{ PROJECT_TITLE }}{% endif %}</h1>
 
     {% if result %}
     <section>
 	<h4 style="text-align:center;">{% trans "Statement just sent" %}</h4>
 
-		<div>{{ result }}</div>
+		<pre>{{ result }}</pre>
 
     </section>
    	{% endif %}

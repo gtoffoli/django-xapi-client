@@ -2,6 +2,7 @@
 20/01/2020 - This module is here just as an example;
 it is a copy of the module with the same in the "commons" application
 """
+from collections import OrderedDict
 
 xapi_activities = {
     'event': {'type': 'http://activitystrea.ms/schema/1.0/event',
@@ -73,6 +74,10 @@ xapi_activities = {
         'display': {"en-US": "learning unit", "it": "unità d'apprendimento"},
         'description': {"en-US": "A module (or learning unit) represents any content aggregation at least one level below the course level. Modules of modules can exist for layering purposes.",},
     },
+    'assignment': {'type': 'http://id.tincanapi.com/activitytype/school-assignment',
+        'display': {"en-US": "school assignment ", "it": "compito",},
+        'description': {"en-US": "A school task performed by a student to satisfy the teacher. Examples are assessments, assigned reading, practice exercises, watch video, etc.",},
+    },
     'level': {'type': 'http://curatr3.com/define/type/level',
         'display': {"en-US": "level ", "it": "livello",},
         'description': {"en-US": "A level of a game or gamified learning platform. Also, a step in a difficulty or competence scale.",},
@@ -88,6 +93,18 @@ xapi_activities = {
     'performance': {'type': 'http://adlnet.gov/expapi/activities/attempt',
         'display': {"en-US": "performance",},
         'description': {"en-US": "A performance is an attempted task or series of tasks within a particular context. … It emphasizes learners being able to do, or perform, specific skills as a result of the instruction.",},
+    },
+    'certificate': {'type': 'https://www.opigno.org/en/tincan_registry/activity_type/certificate',
+        'display': {"en-US": "certificate", "it": "certificato"},
+        'description': {"en-US": "A document attesting to the fact that a person has completed an educational course.",},
+    },
+    'badge': {'type': 'http://activitystrea.ms/schema/1.0/badge',
+        'display': {"en-US": "badge",},
+        'description': {"en-US": "Represents a badge or award granted to an object (typically a person object)",},
+    },
+    'grade classification': {'type': '',
+        'display': {"en-US": "grade classification", "it": "voto di classificazione"},
+        'description': {"en-US": "Represents a grade given or received within a particular context, for example distinction within XYZ music test or A for ABC qualification.",},
     },
     'user profile': {'type': 'http://id.tincanapi.com/activitytype/user-profile',
         'display': {"en-US": "user profile", "it": "profilo d'utente"},
@@ -271,6 +288,10 @@ xapi_verbs = {
         'display': {"en-US": "bookmarked", 'it-IT': 'ha creato un segnalibro per',},
         'description': {"en-US": "Indicates the user determined the content was important enough to keep a reference to it for later.",},
     },
+    'authored': {'id': 'http://activitystrea.ms/schema/1.0/author',
+        'display': {"en-US": "authored", 'it-IT': 'è autore di',},
+        'description': {"en-US": "Indicates that the actor has authored the object. Note that this is a more specific form of the verb create.",},
+    },
     'created': {'id': 'http://activitystrea.ms/schema/1.0/create',
         'display': {"en-US": "created", 'it-IT': 'ha creato',},
         'description': {"en-US": "Indicates that the actor has created the object.",},
@@ -303,35 +324,52 @@ xapi_verbs = {
         'display': {"en-US": "viewed", 'it-IT': 'ha visto',},
         'description': {"en-US": "Indicates that the actor has viewed the object.",},
     },
+    'qualified': {'id': 'http://activitystrea.ms/schema/1.0/qualify',
+        'display': {"en-US": "qualified", 'it-IT': 'si è qualificato/a',},
+        'description': {"en-US": "Indicates that the actor has qualified for the object. If a target is specified, it indicates the context within which the qualification applies.",},
+    },
+    'earned': {'id': 'http://id.tincanapi.com/verb/earned',
+        'display': {"en-US": "earned", 'it-IT': 'ha conseguito',},
+        'description': {"en-US": "Indicates that the actor has earned or has been awarded the object.",},
+    },
+    'received': {'id': 'http://activitystrea.ms/schema/1.0/receive',
+        'display': {"en-US": "received", 'it-IT': 'ha ricevuto',},
+        'description': {"en-US": "Indicates that the actor is receiving an object. Examples include a person receiving a badge object. The object identifies the object being received.",},
+    },
 }
 
-xapi_recipes = {
-    'Events': { # extended from the Attendance profile: see https://registry.tincanapi.com/#home/profiles
+xapi_recipes = OrderedDict([
+    ('Events', { # extended from the Attendance profile: see https://registry.tincanapi.com/#home/profiles
         'activity_types': ['event', 'meeting', 'game', 'place', 'conference', 'conference session', 'tutor session', 'webinar', 'show', 'exhibition'],
         'verbs': ['attended', 'registered', 'unregistered', 'joined', 'left', 'scheduled', 'opened', 'closed', 'adjourned', 'resumed',],
         'comment': 'this recipe mainly concerns work and learning activities scheduled at specific times; please, choose the generic item "event" only if you cannot specify better the activity type',
-    },
-    'Resources': { # extended from the Bookmarklet profile: see https://registry.tincanapi.com/#home/profiles
+    }),
+    ('Resources', { # extended from the Bookmarklet profile: see https://registry.tincanapi.com/#home/profiles
         'activity_types': ['web page', 'blog', 'webinar', 'service', 'book', 'article', 'audio', 'video', 'game',],
-        'verbs': ['experienced', 'read', 'watched', 'listened', 'consumed', 'played', 'rated', 'bookmarked', 'tweeted',],
+        'verbs': ['authored', 'created', 'edited', 'experienced', 'read', 'watched', 'listened', 'consumed', 'played', 'rated', 'bookmarked', 'tweeted',],
         'comment': 'this recipe mainly concerns persistent resources used and referred to online',
-    },
-    'Performances': { # most verbs from https://registry.tincanapi.com/
+    }),
+    ('Performances', { # most verbs from https://registry.tincanapi.com/
         'activity_types': ['show', 'play', 'concert', 'exhibition', 'museum',],
         'verbs': ['was at', 'attended', 'watched', 'listened', 'experienced', 'rated', 'tweeted',],
         'comment': 'this recipe mainly concerns leisure time activities',
-    },
-    'Learning control': { # adapted from the Assessment profile: see https://registry.tincanapi.com/#home/profiles
-        'activity_types': ['course', 'learning path', 'learning unit', 'level', 'assessment', 'performance', 'attempt',],
-        'verbs': ['enrolled onto', 'started', 'completed', 'passed', 'failed',],
+    }),
+    ('Learning control', { # adapted from the Assessment profile: see https://registry.tincanapi.com/#home/profiles
+        'activity_types': ['course', 'learning path', 'learning unit', 'level', 'assignment', 'assessment', 'performance', 'attempt',],
+        'verbs': ['enrolled onto', 'accepted', 'started', 'completed', 'passed', 'failed',],
         'comment': 'this recipe mainly concerns formal and non-formal education',
-    },
-    'CommonSpaces': { # see https://www.commonspaces.it, or its alias https://cs.up2university.eu
+    }),
+    ('Certification', {
+        'activity_types': ['certificate', 'badge', 'level', 'grade classification',],
+        'verbs': ['created', 'updated', 'earned', 'received', 'accepted', 'qualified',],
+        'comment': 'this recipe mainly concerns certificates issued by official and nonofficial agencies',
+    }),
+    ('CommonSpaces', { # see https://www.commonspaces.it, or its alias https://cs.up2university.eu
         'activity_types': ['user profile', 'project', 'membership', 'folder', 'document', 'discussion forum', 'discussion topic', 'forum post', 'resource repository', 'oer', 'web page', 'oer rating', 'learning path', 'learning unit', 'article', 'private message',],
         'verbs': ['searched', 'viewed', 'played', 'bookmarked', 'created', 'deleted', 'edited', 'submitted', 'accepted', 'approved', 'rejected', 'sent',],
         'comment': 'this recipe mainly concerns formal and non-formal education',
-    },
-}
+    }),
+])
 
 xapi_contextual_activities = ['project', 'course', 'learning path', 'folder', 'collection', 'resource repository', 'event', 'place',]
 

@@ -1,6 +1,7 @@
 from datetime import datetime
 import hashlib
 import pyexcel
+import json
 
 from tincan import (
     Statement,
@@ -32,6 +33,10 @@ class SelfRecord(View):
     template_name = 'self_record.html'
 
     def get(self, request, *args, **kwargs):
+        context_activity_type = request.GET.get('ca_type', None)
+        context_object_name = request.GET.get('ca_name', None)
+        context_object_id = request.GET.get('ca_id', None)
+        context_activity_relationship = request.GET.get('ca_rel', None)
         try:
             recipe_ids = settings.XAPI_DEFAULT_RECIPES
         except:
@@ -39,7 +44,10 @@ class SelfRecord(View):
         user = request.user
         actor_name = user.get_display_name()
         actor_email = user.email
-        initial = { 'actor_name': actor_name, 'actor_email': actor_email, 'endpoint': settings.LRS_ENDPOINT, 'platform': XAPI_PLATFORM, 'authority_name': actor_name, 'authority_email': actor_email, }
+        # initial = { 'actor_name': actor_name, 'actor_email': actor_email, 'endpoint': settings.LRS_ENDPOINT, 'platform': XAPI_PLATFORM, 'authority_name': actor_name, 'authority_email': actor_email, }
+        initial = { 'actor_name': actor_name, 'actor_email': actor_email, 'endpoint': settings.LRS_ENDPOINT, 'platform': XAPI_PLATFORM, }
+        if context_activity_type and context_object_name and context_object_id and context_activity_relationship:
+            initial.update({ 'context_activity_type': context_activity_type, 'context_object_name': context_object_name, 'context_object_id': context_object_id, 'context_activity_relationship': context_activity_relationship, })
         if recipe_ids:
             initial['recipe_ids'] = recipe_ids
         form = self.form_class(initial=initial)
@@ -89,16 +97,17 @@ class SelfRecord(View):
                         data['context_activity_relationship']: context_activity_object
                     }
                     context['context_activities'] = context_activities
+                """
                 authority = Agent(
                     name=data['authority_name'],
                     mbox='mailto:{}'.format(data['authority_email'])
                 )
+                """
                 statement = Statement(
                     actor=actor,
                     verb=verb,
                     object=object,
                     context=context,
-                    authority=authority,
                 )
                 # statement.stored = datetime.now()
                 result = send_statement(statement)
@@ -106,6 +115,7 @@ class SelfRecord(View):
         if recipe_ids:
             form.fields['verb_id'].choices = get_verb_choices(recipe_ids)
             form.fields['activity_type'].choices = get_activity_choices(recipe_ids)
+        result = json.dumps(json.loads(result.to_json()), indent=2)
         return render(request, self.template_name, {'form': form, 'result': result})
 
 class ImportEarmaster(View):
