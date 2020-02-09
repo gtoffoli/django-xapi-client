@@ -1,4 +1,5 @@
 from datetime import datetime
+# from django.utils import timezone
 import hashlib
 import pyexcel
 import json
@@ -45,7 +46,7 @@ class SelfRecord(View):
         actor_name = user.get_display_name()
         actor_email = user.email
         # initial = { 'actor_name': actor_name, 'actor_email': actor_email, 'endpoint': settings.LRS_ENDPOINT, 'platform': XAPI_PLATFORM, 'authority_name': actor_name, 'authority_email': actor_email, }
-        initial = { 'actor_name': actor_name, 'actor_email': actor_email, 'endpoint': settings.LRS_ENDPOINT, 'platform': XAPI_PLATFORM, }
+        initial = { 'actor_name': actor_name, 'actor_email': actor_email, 'endpoint': settings.LRS_ENDPOINT, 'platform': XAPI_PLATFORM, 'timestamp': datetime.now(),}
         if context_activity_type and context_object_name and context_object_id and context_activity_relationship:
             initial.update({ 'context_activity_type': context_activity_type, 'context_object_name': context_object_name, 'context_object_id': context_object_id, 'context_activity_relationship': context_activity_relationship, })
         if recipe_ids:
@@ -108,14 +109,15 @@ class SelfRecord(View):
                     verb=verb,
                     object=object,
                     context=context,
+                    timestamp=data['timestamp']
                 )
-                # statement.stored = datetime.now()
                 result = send_statement(statement)
         recipe_ids = request.POST.getlist('recipe_ids')
         if recipe_ids:
             form.fields['verb_id'].choices = get_verb_choices(recipe_ids)
             form.fields['activity_type'].choices = get_activity_choices(recipe_ids)
-        result = json.dumps(json.loads(result.to_json()), indent=2)
+        if result:
+            result = json.dumps(json.loads(result.to_json()), indent=2)
         return render(request, self.template_name, {'form': form, 'result': result})
 
 class ImportEarmaster(View):

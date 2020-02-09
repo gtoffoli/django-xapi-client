@@ -2,6 +2,9 @@
 {% load staticfiles i18n %}
 
 {% block head_title %}{% trans "Record eXperience" %}{% endblock head_title %}
+{% block extra_head %}
+	{{ form.media }}
+{% endblock %}
 
 {% block body %}
 
@@ -46,3 +49,7 @@
     </section>
 
 {% endblock %}
+
+{% block extra_script %}
+	<script src="{% static "js/bootstrap-datetimepicker.js" %}"></script>
+ {% endblock %}
