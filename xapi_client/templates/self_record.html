@@ -2,54 +2,55 @@
 {% load staticfiles i18n %}
 
 {% block head_title %}{% trans "Record eXperience" %}{% endblock head_title %}
+
 {% block extra_head %}
-	{{ form.media }}
+    {{ form.media }}
 {% endblock %}
 
+{% block body_class %}self_record{% endblock %}
 {% block body %}
-
-<h1 style="text-align:center;">{% trans "Record any eXperience in the xAPI Learning Record Store" %}
-	{% if PROJECT_TITLE %}{% trans "of" %}{{ PROJECT_TITLE }}{% endif %}</h1>
-
+<div class="panel panel-c0 text-left marginTB30">
+    <div class="panel-heading-c0 padding1020">
+        <h2 class="marginTB5">{% trans "Record any eXperience in the xAPI Learning Record Store" %}<br>{% if project_title %}{% trans "of" %} {{ project_title }}{% endif %}{% if project_url %} &nbsp; <a href="{{ project_url }}"><i class="fa fa-list-alt font07em c-white" aria-hidden="true"></i></a></a>{% endif %}</h2>
+    </div>
     {% if result %}
-    <section>
-	<h4 style="text-align:center;">{% trans "Statement just sent" %}</h4>
-
-		<pre>{{ result }}</pre>
-
+    <section class="marginT20">
+        <h4 class="paddingL20 demiBold text-center">{% trans "Statement just sent" %}</h4>
+        <pre class="paddingL20">{{ result }}</pre>
     </section>
    	{% endif %}
 
-    <section>
-	<h4 style="text-align:center;">{% trans "Send new statement" %}</h4>
-
-	<form action="" method="post" class="form-horizontal">{% csrf_token %}
-
-    {% for field in form.hidden_fields %}{{ field }}{% endfor %}
-    <fieldset class="padding1020">
-    {% if form.errors %}
-      {% if form.non_field_errors %}
-      <div class="txt-error demiBold" style="margin-left:-20px">
-        {{ form.non_field_errors }}
-      </div>
-      {% endif %}
-   	{% endif %}
-    {% for field in form.visible_fields %}
-      <div class="form-group">
-        <label for="{{ field.name }}" {% if field.field.required %}class="required"{% endif %}>{{ field.label|capfirst}}</label>
-        <span class="txt-error">{{ field.errors }}</span>{{ field }}
-        {% if field.help_text %}<small id="{{ field.name }}helpBlock" class="help-block">{{ field.help_text }}</small>{% endif %}
-      </div>
-    {% endfor %}
-
-	<input type="submit" name="refresh" value="" style="visibility: hidden;" />
-	<input type="submit" name="send" value="{% trans "Send statement" %} &raquo;" />
-	</form>
-
+    <section class="marginT20">
+        <h4 class="paddingL20 demiBold text-center">{% trans "Send new statement" %}</h4>
+        <form action="" method="post" id="self_record_edit">{% csrf_token %}
+            {% for field in form.hidden_fields %}{{ field }}{% endfor %}
+            {% if form.errors %}
+                {% if form.non_field_errors %}
+                    <div class="txt-error demiBold">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+            {% endif %}
+            <fieldset class="padding1020">
+            {% for field in form.visible_fields %}
+                <div class="form-group">
+                    <label for="{{ field.name }}" {% if field.field.required %}class="required"{% endif %}>{{ field.label|capfirst}}</label>
+                    {% comment %}<span class="txt-error">{{ field.errors }}</span>{% endcomment %}{{ field }}
+                    {% if field.help_text %}<small id="{{ field.name }}helpBlock" class="help-block">{{ field.help_text }}</small>{% endif %}
+                </div>
+            {% endfor %}
+            </fieldset>
+            <div class="panel-footer-c0 padding1020">
+                {% comment %}
+                <input type="submit" name="refresh" value="" style="visibility: hidden;" />
+                {% endcomment %}
+                <button type="submit" name="send" id="send" value="send" class="btn btn-default">{% trans "send statement"|capfirst %} &raquo;</button>
+            </div>
+        </form>
     </section>
-
+</div>
 {% endblock %}
 
 {% block extra_script %}
-	<script src="{% static "js/bootstrap-datetimepicker.js" %}"></script>
- {% endblock %}
+    <script src="{% static "js/bootstrap-datetimepicker.js" %}"></script>
+{% endblock %}

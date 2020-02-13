@@ -17,16 +17,18 @@ dateTimeOptions = {
 'maxView': 3,
 'startView': 2,
 'weekStart': 1,
-# 'format': 'dd/mm/yyyy hh:ii',
-'format': 'dd/mm/yyyy',
-'startDate': '01/01/2000',
-'endDate': '31/12/2020',
+'minuteStep': 1, # default 5
+'format': 'dd/mm/yyyy hh:ii',
+'startDate': '01/01/2000 00:00',
+'endDate': '31/12/2020 23:59',
 }
 
+"""
 DATE_INPUT_FORMATS = (
   '%d-%m-%Y %H:%M:%S', '%d-%m-%Y %H:%M', '%d-%m-%Y %H','%d-%m-%Y',
   '%d/%m/%Y %H:%M:%S', '%d/%m/%Y %H:%M', '%d/%m/%Y %H', '%d/%m/%Y',
 )
+"""
 
 class SelfRecordForm(forms.Form):
     # actor_name = forms.CharField(required=False, label=_('actor full name'), widget=forms.TextInput(attrs={'readonly':'readonly', 'class':'form-control',}), help_text=_('this is a computed value'),)

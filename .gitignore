@@ -1,0 +1,10 @@
+#############
+## Python
+#############
+
+*.py[cod]
+
+# Packages
+*Copia.*
+*.bak
+*.old

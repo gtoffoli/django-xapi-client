@@ -35,8 +35,8 @@ class SelfRecord(View):
 
     def get(self, request, *args, **kwargs):
         context_activity_type = request.GET.get('ca_type', None)
-        context_object_name = request.GET.get('ca_name', None)
-        context_object_id = request.GET.get('ca_id', None)
+        context_object_name = project_title = request.GET.get('ca_name', None)
+        context_object_id = project_url = request.GET.get('ca_id', None)
         context_activity_relationship = request.GET.get('ca_rel', None)
         try:
             recipe_ids = settings.XAPI_DEFAULT_RECIPES
@@ -54,10 +54,12 @@ class SelfRecord(View):
         form = self.form_class(initial=initial)
         form.fields['verb_id'].choices = get_verb_choices(recipe_ids)
         form.fields['activity_type'].choices = get_activity_choices(recipe_ids)
-        return render(request, self.template_name, {'form': form})
+        return render(request, self.template_name, {'form': form, 'project_title': project_title, 'project_url': project_url})
 
     def post(self, request, *args, **kwargs):
         result = None
+        project_title = request.GET.get('ca_name', None)
+        project_url = request.GET.get('ca_id', None)
         form = self.form_class(request.POST)
         if form.is_valid():
             # <process form cleaned data>
@@ -118,7 +120,7 @@ class SelfRecord(View):
             form.fields['activity_type'].choices = get_activity_choices(recipe_ids)
         if result:
             result = json.dumps(json.loads(result.to_json()), indent=2)
-        return render(request, self.template_name, {'form': form, 'result': result})
+        return render(request, self.template_name, {'form': form, 'result': result, 'project_title': project_title, 'project_url': project_url})
 
 class ImportEarmaster(View):
     form_class = ImportEarmasterForm
