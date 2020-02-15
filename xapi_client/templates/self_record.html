@@ -11,7 +11,7 @@
 {% block body %}
 <div class="panel panel-c0 text-left marginTB30">
     <div class="panel-heading-c0 padding1020">
-        <h2 class="marginTB5">{% trans "Record any eXperience in the xAPI Learning Record Store" %}<br>{% if project_title %}{% trans "of" %} {{ project_title }}{% endif %}{% if project_url %} &nbsp; <a href="{{ project_url }}"><i class="fa fa-list-alt font07em c-white" aria-hidden="true"></i></a></a>{% endif %}</h2>
+        <h2 class="marginTB5">{% trans "Record any eXperience in the xAPI Learning Record Store" %}<br>{% if project_title %}{% trans "in the context of" %}: <i>{{ project_title }}</i>{% endif %}{% if project_url %} &nbsp; <a href="{{ project_url }}"><i class="fa fa-list-alt font07em c-white" aria-hidden="true"></i></a></a>{% endif %}</h2>
     </div>
     {% if result %}
     <section class="marginT20">
@@ -35,15 +35,13 @@
             {% for field in form.visible_fields %}
                 <div class="form-group">
                     <label for="{{ field.name }}" {% if field.field.required %}class="required"{% endif %}>{{ field.label|capfirst}}</label>
-                    {% comment %}<span class="txt-error">{{ field.errors }}</span>{% endcomment %}{{ field }}
+                    <span class="txt-error">{{ field.errors }}</span>{{ field }}
                     {% if field.help_text %}<small id="{{ field.name }}helpBlock" class="help-block">{{ field.help_text }}</small>{% endif %}
                 </div>
             {% endfor %}
             </fieldset>
             <div class="panel-footer-c0 padding1020">
-                {% comment %}
                 <input type="submit" name="refresh" value="" style="visibility: hidden;" />
-                {% endcomment %}
                 <button type="submit" name="send" id="send" value="send" class="btn btn-default">{% trans "send statement"|capfirst %} &raquo;</button>
             </div>
         </form>

@@ -61,6 +61,8 @@ class SelfRecord(View):
         project_title = request.GET.get('ca_name', None)
         project_url = request.GET.get('ca_id', None)
         form = self.form_class(request.POST)
+        date_time = request.POST.get('timestamp', '')
+        print('date_time:', date_time)
         if form.is_valid():
             # <process form cleaned data>
             data = form.cleaned_data
@@ -106,12 +108,18 @@ class SelfRecord(View):
                     mbox='mailto:{}'.format(data['authority_email'])
                 )
                 """
+                timestamp = data['timestamp']
+                print('timestamp 1:', timestamp)
+                """
+                timestamp = datetime.strptime(date_time, "%d/%m/%Y %H:%M")
+                print('timestamp 2:', timestamp)
+                """
                 statement = Statement(
                     actor=actor,
                     verb=verb,
                     object=object,
                     context=context,
-                    timestamp=data['timestamp']
+                    timestamp=timestamp
                 )
                 result = send_statement(statement)
         recipe_ids = request.POST.getlist('recipe_ids')
@@ -119,7 +127,10 @@ class SelfRecord(View):
             form.fields['verb_id'].choices = get_verb_choices(recipe_ids)
             form.fields['activity_type'].choices = get_activity_choices(recipe_ids)
         if result:
-            result = json.dumps(json.loads(result.to_json()), indent=2)
+            try:
+                result = json.dumps(json.loads(result.to_json()), indent=2)
+            except:
+                pass
         return render(request, self.template_name, {'form': form, 'result': result, 'project_title': project_title, 'project_url': project_url})
 
 class ImportEarmaster(View):
