@@ -340,6 +340,10 @@ xapi_verbs = {
         'display': {"en-US": "received", 'it-IT': 'ha ricevuto',},
         'description': {"en-US": "Indicates that the actor is receiving an object. Examples include a person receiving a badge object. The object identifies the object being received.",},
     },
+    'accessed': {'id': 'http://activitystrea.ms/schema/1.0/access',
+        'display': {"en-US": "accessed", 'it-IT': 'ha acceduto a',},
+        'description': {"en-US": "Indicates that the actor has accessed the object. For instance, a person accessing a[n online conference] room, or accessing a file.",},
+    },
 }
 
 xapi_recipes = OrderedDict([
@@ -369,8 +373,8 @@ xapi_recipes = OrderedDict([
         'comment': 'this recipe mainly concerns certificates issued by official and nonofficial agencies',
     }),
     ('CommonSpaces', { # see https://www.commonspaces.it, or its alias https://cs.up2university.eu
-        'activity_types': ['user profile', 'project', 'membership', 'folder', 'document', 'discussion forum', 'discussion topic', 'forum post', 'resource repository', 'oer', 'web page', 'oer rating', 'learning path', 'learning unit', 'article', 'private message',],
-        'verbs': ['searched', 'viewed', 'played', 'bookmarked', 'created', 'deleted', 'edited', 'submitted', 'accepted', 'approved', 'rejected', 'sent',],
+        'activity_types': ['user profile', 'project', 'membership', 'folder', 'document', 'discussion forum', 'discussion topic', 'forum post', 'resource repository', 'oer', 'web page', 'oer rating', 'learning path', 'learning unit', 'article', 'private message', 'meeting',],
+        'verbs': ['searched', 'viewed', 'played', 'bookmarked', 'created', 'deleted', 'edited', 'submitted', 'accepted', 'approved', 'rejected', 'sent', 'accessed',],
         'comment': 'this recipe mainly concerns formal and non-formal education',
     }),
 ])
