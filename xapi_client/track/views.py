@@ -19,14 +19,13 @@ from xapi_client.utils import get_activity_choices,  get_verb_choices, make_uri
 from xapi_client.xapi_vocabularies import xapi_verbs_by_id, xapi_activities_by_type
 from xapi_client.track.xapi_statements import send_statement
 
-from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 
-from .forms import SelfRecordForm, ImportEarmasterForm
+from .forms import SelfRecordForm
 
 @method_decorator(login_required, name='post')
 class SelfRecord(View):
@@ -84,7 +83,6 @@ class SelfRecord(View):
                 if data['object_description']:
                     activity_definition.description = LanguageMap(**{object_language: data['object_description']})
                 object = Activity(
-                    # id='http://cs.eu/{}'.format(hashlib.md5(data['object_id'].encode())),
                     id=make_uri(data['object_id']),
                     definition=activity_definition,
                 )
@@ -132,34 +130,3 @@ class SelfRecord(View):
             except:
                 pass
         return render(request, self.template_name, {'form': form, 'result': result, 'project_title': project_title, 'project_url': project_url})
-
-class ImportEarmaster(View):
-    form_class = ImportEarmasterForm
-    template_name = 'import_earmaster.html'
-
-    def get(self, request, *args, **kwargs):
-        user = request.user
-        name = user.get_display_name()
-        email = user.email
-        platform = 'EarMaster'
-        initial = { 'name': name, 'email': email, 'endpoint': settings.LRS_ENDPOINT, 'platform': platform }
-        form = self.form_class(initial=initial)
-        return render(request, self.template_name, {'form': form})
-
-    def post(self, request, *args, **kwargs):
-        form = self.form_class(request.POST, request.FILES)
-        if form.is_valid():
-            file = request.FILES['file']
-            filename = file.name
-            print('filename:', filename)
-            extension = filename.split(".")[-1]
-            content = file.read()
-            records = pyexcel.get_records(file_type=extension, file_content=content)
-            name_dict = records[0]
-            keys = name_dict.keys()
-            rows = []
-            for record in records:
-                row = [record[key] for key in keys]
-                print(row)
-                rows.append(row)
-        return render(request, self.template_name, {'keys': keys, 'rows': rows, 'form': form})

@@ -48,10 +48,3 @@ class SelfRecordForm(forms.Form):
     authority_name = forms.CharField(required=False, label=_('authority name'), widget=forms.TextInput(attrs={'readonly':'readonly', 'class':'form-control',}), help_text=_('name of person or agency certifying this activity; this is a fixed value'),)
     authority_email = forms.EmailField(required=False, label=_('authority email'), widget=forms.TextInput(attrs={'readonly':'readonly', 'class':'form-control',}), help_text=_('email of person or agency certifying this activity; this is a fixed value'),)
     """
-    
-class ImportEarmasterForm(forms.Form):
-    name = forms.CharField(required=False, label=_('full name'), widget=forms.TextInput(attrs={'readonly':'readonly', 'class':'form-control',}), help_text=_('this is a computed value'),)
-    email = forms.EmailField(required=False, label=_('mailbox'), widget=forms.TextInput(attrs={'readonly':'readonly', 'class':'form-control',}), help_text=_('this is a computed value'),)
-    platform = forms.CharField(required=False, label=_('learning platform'), widget=forms.TextInput(attrs={'readonly':'readonly', 'class':'form-control',}), help_text=_('this is a fixed value'),)
-    endpoint = forms.CharField(required=False, label=_('LRS endpoint'), widget=forms.TextInput(attrs={'readonly':'readonly', 'class':'form-control'}), help_text=_('this is a fixed value'),)
-    file = forms.FileField(required=True, label=_('select a file'), widget=forms.FileInput(attrs={'class': 'btn btn-default',}))
