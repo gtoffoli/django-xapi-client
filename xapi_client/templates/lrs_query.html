@@ -1,0 +1,79 @@
+{% extends "commons_base.html" %}
+{% load staticfiles i18n %}
+
+{% block head_title %}{% trans "Compute LL Dashboard URL" %}{% endblock head_title %}
+
+{% block extra_head %}
+    {{ form.media }}
+<style>
+   .date { width: 80%; }
+</style>
+{% endblock %}
+
+{% block body_class %}self_record{% endblock %}
+{% block body %}
+<div class="panel panel-c0 text-left marginTB30">
+    <div class="panel-heading-c0 padding1020">
+        <h2 class="marginTB5">{% trans "Compute the URL of a LA parameterized Dashboard" %}</h2>
+    </div>
+    {% if result %}
+    <section class="marginT20">
+        <h4 class="paddingL20 demiBold text-center">{% trans "URL just computed" %}</h4>
+        <a href="{{ result|safe }}" target="_blank">{{ result }}</a>
+    </section>
+   	{% endif %}
+
+    <section class="marginT20">
+        <h4 class="paddingL20 demiBold text-center">{% trans "Define the query to compute a new URL" %}</h4>
+        <form action="" method="post" id="self_record_edit">{% csrf_token %}
+            {% for field in form.hidden_fields %}{{ field }}{% endfor %}
+            {% if form.errors %}
+                {% if form.non_field_errors %}
+                    <div class="txt-error demiBold">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+            {% endif %}
+            <fieldset class="padding1020">
+			<table>
+			<tr>
+			<td width="30%"><div class="form-group">
+                <label for="{{ form.platform.id_for_label }}"> {{ form.platform.label|capfirst}}</label>
+                <span class="txt-error">{{ form.platform.errors }}</span>{{ form.platform }}
+                <small id="{{ form.platform.name }}helpBlock" class="help-block">{{ form.platform.help_text }}</small>
+				</div></td>
+            <td width="35%"><div class="form-group">
+                <label for="{{ form.date_from.id_for_label }}"> {{ form.date_from.label|capfirst}}</label>
+                <span class="txt-error">{{ form.date_from.errors }}</span>{{ form.date_from }}
+                <small id="{{ form.date_from.name }}helpBlock" class="help-block">{{ form.date_from.help_text }}</small>
+				</div></td>
+            <td width="35%"><div class="form-group">
+                <label for="{{ form.date_to.id_for_label }}"> {{ form.date_to.label|capfirst}}</label>
+                <span class="txt-error">{{ form.date_to.errors }}</span>{{ form.date_to }}
+                <small id="{{ form.date_to.name }}helpBlock" class="help-block">{{ form.date_to.help_text }}</small>
+				</div></td>
+			</tr>
+			</table>
+            <div class="form-group">
+                <label for="{{ form.courses.id_for_label }}"> {{ form.courses.label|capfirst}}</label>
+                <span class="txt-error">{{ form.courses.errors }}</span>{{ form.courses }}
+                <small id="{{ form.courses.name }}helpBlock" class="help-block">{{ form.courses.help_text }}</small>
+            </div>
+            <div class="form-group">
+                <label for="{{ form.actors.id_for_label }}"> {{ form.actors.label|capfirst}}</label>
+                <span class="txt-error">{{ form.courses.errors }}</span>{{ form.actors }}
+                <small id="{{ form.actors.name }}helpBlock" class="help-block">{{ form.actors.help_text }}</small>
+            </div>
+            </fieldset>
+            <div class="panel-footer-c0 padding1020">
+                <input type="submit" name="refresh" value="" style="visibility: hidden;" />
+                <button type="submit" name="compute" id="send" value="send" class="btn btn-default">{% trans "compute URL"|capfirst %} &raquo;</button>
+            </div>
+        </form>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_script %}
+    <script src="{% static "js/bootstrap-datetimepicker.js" %}"></script>
+{% endblock %}
