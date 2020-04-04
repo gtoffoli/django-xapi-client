@@ -1,18 +1,30 @@
-{% extends "commons_base.html" %}
-{% load staticfiles i18n %}
+{% load staticfiles %}
+{% load i18n %}
 
-{% block head_title %}{% trans "Compute LL Dashboard URL" %}{% endblock head_title %}
-
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+  <head>
+    <meta charset="utf-8">
+    <link href="{% static "bootstrap/css/bootstrap.css" %}" rel="stylesheet">
+    <link href="{% static "commons/css/commons.css" %}" rel="stylesheet">
+    <link href='{{ PROTOCOL }}://fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,700italic,800italic,400,600,700,800&subset=latin-ext' rel='stylesheet' type='text/css'>
+    <script src="{% static "jquery/js/jquery-2.1.4.min.js" %}"></script>
+    <script src="https://use.fontawesome.com/d391635073.js"></script>
+    <script type="text/javascript" src="{% static "js/bootstrap.min.js" %}"></script>
+    <script src="{% static "js/bootstrap-datetimepicker.js" %}"></script>
+{% block head_title %}
+    <title>Compute LL Dashboard URL</title>
+{% endblock %}
 {% block extra_head %}
-    {{ form.media }}
 <style>
-   .date { width: 80%; }
+    .date { width: 80%; }
 </style>
 {% endblock %}
+  </head>
 
-{% block body_class %}self_record{% endblock %}
-{% block body %}
-<div class="panel panel-c0 text-left marginTB30">
+{% block body_base %}
+<body style="padding: 0;">
+<div class="panel panel-c0 text-left">
     <div class="panel-heading-c0 padding1020">
         <h2 class="marginTB5">{% trans "Compute the URL of a LA parameterized Dashboard" %}</h2>
     </div>
@@ -72,8 +84,6 @@
         </form>
     </section>
 </div>
+</body>
 {% endblock %}
 
-{% block extra_script %}
-    <script src="{% static "js/bootstrap-datetimepicker.js" %}"></script>
-{% endblock %}
