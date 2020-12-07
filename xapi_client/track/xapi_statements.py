@@ -1,8 +1,10 @@
 # This module is still too dependent on being originated by CommonSpaces!
 # ASAP it should be made more generic.
 
+from multiprocessing import Process
 from importlib import import_module
 import uuid
+
 from tincan import (
     RemoteLRS,
     Statement,
@@ -162,46 +164,44 @@ def put_statement(request, user, verb, object, target, language=XAPI_LANGUAGE):
         object=object,
         context=context,
     )
-    """
-    # save our statement to the remote_lrs and store the response in 'response'
-    response = lrs.save_statement(statement)
-
-    if not response:
-        raise ValueError("statement failed to save")
-    if not response.success:
-        print ("...response:")
-        print ("...content:", response.content)
-        print ("...data:", response.data)
-        raise ValueError("response was unsuccessful")
-
-    # retrieve our statement from the remote_lrs using the id returned in the response
-    response = lrs.retrieve_statement(response.content.id)
-
-    if not response.success:
-        raise ValueError("statement could not be retrieved")
-
-    return response.success
-    """
     return send_statement(statement)
 
-def send_statement(statement):
+def send_statement_without_timeout(statement, success, result):
     # construct an LRS
     lrs = RemoteLRS(
         version = settings.LRS_VERSION,
         endpoint = settings.LRS_ENDPOINT,
         auth = settings.LRS_AUTH,
     )
-    # save our statement to the remote_lrs and store the response in 'response'
-    lrs_response = lrs.save_statement(statement)
-    if not lrs_response:
-        result = "statement failed to save"
-    elif not lrs_response.success:
-        result = lrs_response.data
-    else:
-        # retrieve our statement from the remote_lrs using the id returned in the response
-        lrs_response = lrs.retrieve_statement(lrs_response.content.id)
-        if lrs_response.success:
-            result = lrs_response.content
-        else:
-            result = lrs_response.data
-    return result
+    try:
+        # save our statement to the remote_lrs and store the response in 'response'
+        lrs_response = lrs.save_statement(statement)
+        if lrs_response:
+            if lrs_response.success:
+                try:
+                    # retrieve our statement from the remote_lrs using the id returned in the response
+                    lrs_response = lrs.retrieve_statement(lrs_response.content.id)
+                    if lrs_response.success:
+                        result = lrs_response.content
+                        success = True
+                    else:
+                        result = lrs_response.data
+                except Exception as e:
+                    result = e
+            else:
+                result = lrs_response.data
+    except Exception as e:
+        result = e
+
+def send_statement(statement, timeout=1):
+    success = False
+    result = ''
+    # We create a Process
+    action_process = Process(target=send_statement_without_timeout, args=(statement, success, result))
+    # We start the process and we block for 5 seconds.
+    action_process.start()
+    action_process.join(timeout=timeout)
+    # We terminate the process.
+    action_process.terminate()
+    print('send_statement', success, result)
+    return success
