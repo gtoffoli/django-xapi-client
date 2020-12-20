@@ -93,11 +93,14 @@ def put_statement(request, user, verb, object, target, language=XAPI_LANGUAGE):
 
     # construct the actor of the statement
     # IMPORTANT - account is OK but cannot coexist with mbox or other way of uniquely identifying the actor
-    actor = Agent(
-        name=user.get_display_name(),
-        mbox='mailto:%s' % user.email,
-        # account=AgentAccount(name=str(user.pk), home_page='https://www.commonspaces.eu')
-    )
+    try:
+        actor = Agent(
+            name=user.get_display_name(),
+            mbox='mailto:%s' % user.email,
+            # account=AgentAccount(name=str(user.pk), home_page='https://www.commonspaces.eu')
+        )
+    except:
+        return False
 
     # construct the verb of the statement
     verb = XAPI_VERB_ALIASES.get(verb, verb) # for compatibility with CommonSpaces
