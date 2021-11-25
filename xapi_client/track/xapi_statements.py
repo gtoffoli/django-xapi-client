@@ -82,7 +82,8 @@ def get_context_grouping(request, target):
        'definition': {'type': xapi_activities[target_type]['type'], 'name': {get_language(target): get_name(target)}}
     }
 
-def put_statement(request, user, verb, object, target, language=XAPI_LANGUAGE):
+# def put_statement(request, user, verb, object, target, language=XAPI_LANGUAGE):
+def put_statement(request, user, verb, object, target, language=XAPI_LANGUAGE, timeout=1):
 
     # construct an LRS
     lrs = RemoteLRS(
@@ -167,7 +168,8 @@ def put_statement(request, user, verb, object, target, language=XAPI_LANGUAGE):
         object=object,
         context=context,
     )
-    return send_statement(statement)
+    # return send_statement(statement)
+    return send_statement(statement, timeout=timeout)
 
 def send_statement_without_timeout(statement, success, result):
     # construct an LRS
