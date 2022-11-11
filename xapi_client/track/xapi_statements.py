@@ -1,9 +1,7 @@
 # This module is still too dependent on being originated by CommonSpaces!
 # ASAP it should be made more generic.
 
-from multiprocessing import Process
-from importlib import import_module
-import uuid
+from multiprocessing import Process, Queue
 
 from tincan import (
     RemoteLRS,
@@ -82,16 +80,25 @@ def get_context_grouping(request, target):
        'definition': {'type': xapi_activities[target_type]['type'], 'name': {get_language(target): get_name(target)}}
     }
 
-# def put_statement(request, user, verb, object, target, language=XAPI_LANGUAGE):
+def make_lrs():
+    version = settings.LRS_VERSION
+    endpoint = settings.LRS_ENDPOINT
+    if settings.LRS_USERNAME and settings.LRS_PASSWORD:
+        lrs = RemoteLRS(
+            version = version,
+            endpoint = endpoint,
+            username = settings.LRS_USERNAME,
+            password = settings.LRS_PASSWORD
+        )
+    else:
+        lrs = RemoteLRS(
+            version = version,
+            endpoint = endpoint,
+            auth = settings.LRS_AUTH,
+        )
+    return lrs
+
 def put_statement(request, user, verb, object, target, language=XAPI_LANGUAGE, timeout=1):
-
-    # construct an LRS
-    lrs = RemoteLRS(
-        version = settings.LRS_VERSION,
-        endpoint = settings.LRS_ENDPOINT,
-        auth = settings.LRS_AUTH,
-    )
-
     # construct the actor of the statement
     # IMPORTANT - account is OK but cannot coexist with mbox or other way of uniquely identifying the actor
     try:
@@ -102,6 +109,7 @@ def put_statement(request, user, verb, object, target, language=XAPI_LANGUAGE, t
         )
     except:
         return False
+    print('actor', actor)
 
     # construct the verb of the statement
     verb = XAPI_VERB_ALIASES.get(verb, verb) # for compatibility with CommonSpaces
@@ -109,6 +117,7 @@ def put_statement(request, user, verb, object, target, language=XAPI_LANGUAGE, t
         id=xapi_verbs[verb]['id'],
         display=LanguageMap(**xapi_verbs[verb]['display']),
     )
+    print('verb', verb)
 
     action = object.__class__.__name__
     action = XAPI_ACTIVITY_ALIASES.get(action, action) # for compatibility with CommonSpaces
@@ -128,6 +137,7 @@ def put_statement(request, user, verb, object, target, language=XAPI_LANGUAGE, t
         id=object_id,
         definition=activity_definition,
     )
+    print('object', object)
 
     context = {'platform': XAPI_PLATFORM, 'language': get_current_language()}
     """ 190308 GT: would produce the exception "Object of type 'UUID' is not JSON serializable" in getting the response
@@ -160,6 +170,7 @@ def put_statement(request, user, verb, object, target, language=XAPI_LANGUAGE, t
         if context_activities:
             context['context_activities'] = context_activities
     context = Context(**context)
+    print('context', context)
 
     # construct the actual statement
     statement = Statement(
@@ -168,19 +179,21 @@ def put_statement(request, user, verb, object, target, language=XAPI_LANGUAGE, t
         object=object,
         context=context,
     )
+    print('statement', statement)
     # return send_statement(statement)
     return send_statement(statement, timeout=timeout)
 
-def send_statement_without_timeout(statement, success, result):
+# def send_statement_without_timeout(statement, success, result):
+def send_statement_without_timeout(queue):
     # construct an LRS
-    lrs = RemoteLRS(
-        version = settings.LRS_VERSION,
-        endpoint = settings.LRS_ENDPOINT,
-        auth = settings.LRS_AUTH,
-    )
+    lrs = make_lrs()
+    statement = queue.get()
+    result = queue.get()
+    success = queue.get()
     try:
         # save our statement to the remote_lrs and store the response in 'response'
         lrs_response = lrs.save_statement(statement)
+        print('lrs_response', lrs_response)
         if lrs_response:
             if lrs_response.success:
                 try:
@@ -191,22 +204,30 @@ def send_statement_without_timeout(statement, success, result):
                         success = True
                     else:
                         result = lrs_response.data
+                        success = False
                 except Exception as e:
                     result = e
             else:
                 result = lrs_response.data
     except Exception as e:
         result = e
+    queue.put(result)
+    queue.put(success)
 
 def send_statement(statement, timeout=1):
     success = False
     result = ''
     # We create a Process
-    action_process = Process(target=send_statement_without_timeout, args=(statement, success, result))
+    queue = Queue()
+    queue.put(statement)
+    queue.put(result)
+    queue.put(success)
+    action_process = Process(target=send_statement_without_timeout, args=(queue,))
     # We start the process and we block for 5 seconds.
     action_process.start()
     action_process.join(timeout=timeout)
     # We terminate the process.
+    result = queue.get()
+    success = queue.get()
     action_process.terminate()
-    print('send_statement', success, result)
     return success
