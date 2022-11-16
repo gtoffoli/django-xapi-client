@@ -100,7 +100,7 @@ def make_lrs():
     return lrs
 
 # def put_statement(request, user, verb, object, target, language=XAPI_LANGUAGE, timeout=1):
-def put_statement(request, user, verb, object, target, result=None, response=None, score=None, language=XAPI_LANGUAGE, timeout=1):
+def put_statement(request, user, verb, object, target, activity_id='', result=None, response=None, score=None, language=XAPI_LANGUAGE, timeout=1):
     # IMPORTANT: do not confound the result argument of put_statement with local variables with same name in this module!
     # construct the actor of the statement
     # IMPORTANT - account is OK but cannot coexist with mbox or other way of uniquely identifying the actor
@@ -122,24 +122,39 @@ def put_statement(request, user, verb, object, target, result=None, response=Non
     )
     print('verb', verb)
 
-    action = object.__class__.__name__
-    action = XAPI_ACTIVITY_ALIASES.get(action, action) # for compatibility with CommonSpaces
-    activity_type = xapi_activities[action]['type']
-    object_id = get_object_id(request, object) # 190307 GT: defined get_object_id
-    object_name = get_name(object) # 190307 GT: defined get_name
-    object_description = get_description(object)
-    object_language = get_language(object)
-    activity_definition = ActivityDefinition(
-         name=LanguageMap(**{object_language: object_name}),
-         description=object_description and LanguageMap(**{object_language: object_description}) or None,
-         type=activity_type,                                        
-    )
-
-    # construct the object of the statement
-    object = Activity(
-        id=object_id,
-        definition=activity_definition,
-    )
+    if object:
+        # construct the object of the statement for a specific object/activity
+        action = object.__class__.__name__
+        action = XAPI_ACTIVITY_ALIASES.get(action, action) # for compatibility with CommonSpaces
+        activity_type = xapi_activities[action]['type']
+        object_id = get_object_id(request, object) # 190307 GT: defined get_object_id
+        object_name = get_name(object) # 190307 GT: defined get_name
+        object_description = get_description(object)
+        object_language = get_language(object)
+        activity_definition = ActivityDefinition(
+             name=LanguageMap(**{object_language: object_name}),
+             description=object_description and LanguageMap(**{object_language: object_description}) or None,
+             type=activity_type,                                        
+        )
+        object = Activity(
+            id=object_id,
+            definition=activity_definition,
+        )
+    elif activity_id:
+        # construct the object of the statement for a class of activities
+        activity = xapi_activities[activity_id]
+        name = LanguageMap(**activity['display'])
+        description=activity.get('description', None)
+        description = description and LanguageMap(**description) or None
+        activity_definition = ActivityDefinition(
+             name=name,
+             description=description,
+             type=activity['type'],                                        
+        )
+        object = Activity(
+            id=request.build_absolute_uri(),
+            definition=activity_definition,
+        )
     print('object', object)
 
     context = {'platform': XAPI_PLATFORM, 'language': get_current_language()}
