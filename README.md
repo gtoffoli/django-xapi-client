@@ -4,7 +4,7 @@ A set of functions to put, get and process *xAPI statements*.
 
 This is a *Django app* for writing statements to, and reading statements from, an xAPI *Learning Record Store* (LRS) and supporting some processing on them.
 
-This app was initially created by extracting some code from the [CommonSpaces Platform](https://github.com/gtoffoli/commons), and was tested with the [Learning Locker LRS](https://learningpool.com/solutions/learning-locker-community-overview/). Now we have interfaced it also to [TRAX LRS](https://traxlrs.com/).
+This app was initially created by extracting some code from the [CommonSpaces Platform](https://github.com/gtoffoli/commons), and was tested with the [Learning Locker](https://learningpool.com/solutions/learning-locker-community-overview/)  LRS. Now we have interfaced it also to [TRAX LRS](https://traxlrs.com/).
 
 *django-xapi-client* relies on the *Python* implemetation of the xAPI protocol [TinCanPython](https://github.com/openedx/TinCanPython), developed by Rustici Sofware, as maintained by the [OpenEdx](https://openedx.org/) project. It is still used as an extension of *CommonSpaces* inside a few *Erasmus+* projects. 
 

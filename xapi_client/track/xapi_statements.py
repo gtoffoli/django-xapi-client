@@ -10,6 +10,7 @@ from tincan import (
     Verb,
     Activity,
     Context,
+    Result,
     LanguageMap,
     ActivityDefinition,
     StateDocument,
@@ -98,7 +99,9 @@ def make_lrs():
         )
     return lrs
 
-def put_statement(request, user, verb, object, target, language=XAPI_LANGUAGE, timeout=1):
+# def put_statement(request, user, verb, object, target, language=XAPI_LANGUAGE, timeout=1):
+def put_statement(request, user, verb, object, target, result=None, response=None, score=None, language=XAPI_LANGUAGE, timeout=1):
+    # IMPORTANT: do not confound the result argument of put_statement with local variables with same name in this module!
     # construct the actor of the statement
     # IMPORTANT - account is OK but cannot coexist with mbox or other way of uniquely identifying the actor
     try:
@@ -172,12 +175,18 @@ def put_statement(request, user, verb, object, target, language=XAPI_LANGUAGE, t
     context = Context(**context)
     print('context', context)
 
+    if response:
+        result = Result(
+            response=response,
+        )
+
     # construct the actual statement
     statement = Statement(
         actor=actor,
         verb=verb,
         object=object,
         context=context,
+        result=result,
     )
     print('statement', statement)
     # return send_statement(statement)

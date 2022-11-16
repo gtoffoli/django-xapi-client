@@ -251,6 +251,10 @@ xapi_verbs = {
         'display': {"en-US": "watched",},
         'description': {"en-US": "Indicates that the actor has watched the object. This verb is typically applicable only when the object represents dynamic, visible content such as a movie, a television show or a public performance. It is a more specific form of the verbs experience, play and consume.",},
     },
+    'commented': {'id': 'http://adlnet.gov/expapi/verbs/commented',
+        'display': {"en-US": "commented", 'it-IT': 'ha commentato',},
+        'description': {"en-US": "Offered an opinion or written experience of the activity. .. Comments can be sent from either party with the idea that the other will read and react to the content.",},
+    },
     'rated': {'id': 'http://id.tincanapi.com/verb/rated',
         'display': {"en-US": "rated",},
         'description': {"en-US": "Action of giving a rating to an object. Should only be used when the action is the rating itself, as opposed to another action such as reading where a rating can be applied to the object as part of that action. In general the rating should be included in the Result with a Score object.",},
@@ -349,17 +353,17 @@ xapi_verbs = {
 xapi_recipes = OrderedDict([
     ('Events', { # extended from the Attendance profile: see https://registry.tincanapi.com/#home/profiles
         'activity_types': ['event', 'meeting', 'game', 'place', 'conference', 'conference session', 'tutor session', 'webinar', 'show', 'exhibition'],
-        'verbs': ['attended', 'registered', 'unregistered', 'joined', 'left', 'scheduled', 'opened', 'closed', 'adjourned', 'resumed',],
+        'verbs': ['attended', 'registered', 'unregistered', 'joined', 'left', 'commented', 'scheduled', 'opened', 'closed', 'adjourned', 'resumed',],
         'comment': 'this recipe mainly concerns work and learning activities scheduled at specific times; please, choose the generic item "event" only if you cannot specify better the activity type',
     }),
     ('Resources', { # extended from the Bookmarklet profile: see https://registry.tincanapi.com/#home/profiles
         'activity_types': ['web page', 'blog', 'webinar', 'service', 'book', 'article', 'audio', 'video', 'game',],
-        'verbs': ['authored', 'created', 'edited', 'experienced', 'read', 'watched', 'listened', 'consumed', 'played', 'rated', 'bookmarked', 'tweeted',],
+        'verbs': ['authored', 'created', 'edited', 'experienced', 'read', 'watched', 'listened', 'consumed', 'played', 'commented', 'rated', 'bookmarked', 'tweeted',],
         'comment': 'this recipe mainly concerns persistent resources used and referred to online',
     }),
     ('Performances', { # most verbs from https://registry.tincanapi.com/
         'activity_types': ['show', 'play', 'concert', 'exhibition', 'museum',],
-        'verbs': ['was at', 'attended', 'watched', 'listened', 'experienced', 'rated', 'tweeted',],
+        'verbs': ['was at', 'attended', 'watched', 'listened', 'experienced', 'commented', 'rated', 'tweeted',],
         'comment': 'this recipe mainly concerns leisure time activities',
     }),
     ('Learning control', { # adapted from the Assessment profile: see https://registry.tincanapi.com/#home/profiles
@@ -374,7 +378,7 @@ xapi_recipes = OrderedDict([
     }),
     ('CommonSpaces', { # see https://www.commonspaces.it, or its alias https://cs.up2university.eu
         'activity_types': ['user profile', 'project', 'membership', 'folder', 'document', 'discussion forum', 'discussion topic', 'forum post', 'resource repository', 'oer', 'web page', 'oer rating', 'learning path', 'learning unit', 'article', 'private message', 'meeting',],
-        'verbs': ['searched', 'viewed', 'played', 'bookmarked', 'created', 'deleted', 'edited', 'submitted', 'accepted', 'approved', 'rejected', 'sent', 'accessed',],
+        'verbs': ['searched', 'viewed', 'played', 'commented', 'bookmarked', 'created', 'deleted', 'edited', 'submitted', 'accepted', 'approved', 'rejected', 'sent', 'accessed',],
         'comment': 'this recipe mainly concerns formal and non-formal education',
     }),
 ])
