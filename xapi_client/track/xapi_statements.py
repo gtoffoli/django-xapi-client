@@ -217,7 +217,7 @@ def send_statement_without_timeout(queue):
     try:
         # save our statement to the remote_lrs and store the response in 'response'
         lrs_response = lrs.save_statement(statement)
-        print('lrs_response', lrs_response)
+        # print('lrs_response', lrs_response)
         if lrs_response:
             if lrs_response.success:
                 try:
