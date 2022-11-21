@@ -246,7 +246,8 @@ def send_statement(statement, timeout=1):
     queue.put(statement)
     queue.put(result)
     queue.put(success)
-    action_process = Process(target=send_statement_without_timeout, args=(queue,))
+    # action_process = Process(target=send_statement_without_timeout, args=(queue,))
+    action_process = Process(daemon=True, target=send_statement_without_timeout, args=(queue,))
     # We start the process and we block for 5 seconds.
     action_process.start()
     action_process.join(timeout=timeout)
