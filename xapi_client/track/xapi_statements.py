@@ -220,6 +220,8 @@ def send_statement_without_timeout(queue):
         # print('lrs_response', lrs_response)
         if lrs_response:
             if lrs_response.success:
+                result = lrs_response.data
+                """
                 try:
                     # retrieve our statement from the remote_lrs using the id returned in the response
                     lrs_response = lrs.retrieve_statement(lrs_response.content.id)
@@ -231,6 +233,7 @@ def send_statement_without_timeout(queue):
                         success = False
                 except Exception as e:
                     result = e
+                """
             else:
                 result = lrs_response.data
     except Exception as e:
