@@ -1,6 +1,7 @@
 # This module is still too dependent on being originated by CommonSpaces!
 # ASAP it should be made more generic.
 
+import sys, os
 from multiprocessing import Process, Queue
 
 from tincan import (
@@ -204,11 +205,16 @@ def put_statement(request, user, verb, object, target, activity_id='', result=No
         result=result,
     )
     print('statement', statement)
-    # return send_statement(statement)
     return send_statement(statement, timeout=timeout)
 
 # def send_statement_without_timeout(statement, success, result):
 def send_statement_without_timeout(queue):
+    # avoid [Errno 5] Input/output error in action_process.start() .. sys.stderr.flush()
+    if settings.DEBUG:
+        sys.stderr = open(os.path.join(settings.BASE_DIR, 'logs', 'error.log'), 'a')
+    else:
+        sys.stdout = open(os.devnull, 'w')
+        sys.stderr = open(os.devnull, 'w')
     # construct an LRS
     lrs = make_lrs()
     statement = queue.get()
@@ -221,6 +227,7 @@ def send_statement_without_timeout(queue):
         if lrs_response:
             if lrs_response.success:
                 result = lrs_response.data
+                success = True
                 """
                 try:
                     # retrieve our statement from the remote_lrs using the id returned in the response
