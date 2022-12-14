@@ -2,6 +2,7 @@
 # ASAP it should be made more generic.
 
 import sys, os
+import json
 from multiprocessing import Process, Queue
 
 from tincan import (
@@ -29,6 +30,8 @@ try:
 except:
     XAPI_PLATFORM = 'unspecified platform'
 XAPI_LANGUAGE = settings.LANGUAGE_CODE
+
+EXTENDED = False
 
 def get_name(obj):
     return hasattr(obj, '__str__') and obj.__str__() or ''
@@ -82,9 +85,12 @@ def get_context_grouping(request, target):
        'definition': {'type': xapi_activities[target_type]['type'], 'name': {get_language(target): get_name(target)}}
     }
 
-def make_lrs():
+def make_lrs(extended=False):
     version = settings.LRS_VERSION
     endpoint = settings.LRS_ENDPOINT
+    if extended:
+        endpoint = endpoint.replace('std', 'ext')
+ 
     if settings.LRS_USERNAME and settings.LRS_PASSWORD:
         lrs = RemoteLRS(
             version = version,
@@ -113,7 +119,6 @@ def put_statement(request, user, verb, object, target, activity_id='', result=No
         )
     except:
         return False
-    print('actor', actor)
 
     # construct the verb of the statement
     verb = XAPI_VERB_ALIASES.get(verb, verb) # for compatibility with CommonSpaces
@@ -121,7 +126,6 @@ def put_statement(request, user, verb, object, target, activity_id='', result=No
         id=xapi_verbs[verb]['id'],
         display=LanguageMap(**xapi_verbs[verb]['display']),
     )
-    print('verb', verb)
 
     if object:
         # construct the object of the statement for a specific object/activity
@@ -156,7 +160,6 @@ def put_statement(request, user, verb, object, target, activity_id='', result=No
             id=request.build_absolute_uri(),
             definition=activity_definition,
         )
-    print('object', object)
 
     context = {'platform': XAPI_PLATFORM, 'language': get_current_language()}
     """ 190308 GT: would produce the exception "Object of type 'UUID' is not JSON serializable" in getting the response
@@ -177,7 +180,6 @@ def put_statement(request, user, verb, object, target, activity_id='', result=No
                 if project:
                     context_activities['grouping'] = get_context_grouping(request, project)
             elif target_type == 'Forum':
-                # project = target.forum_get_project()
                 project = target.get_project()
                 if project:
                     context_activities['grouping'] = get_context_grouping(request, project)
@@ -189,7 +191,6 @@ def put_statement(request, user, verb, object, target, activity_id='', result=No
         if context_activities:
             context['context_activities'] = context_activities
     context = Context(**context)
-    print('context', context)
 
     if response:
         result = Result(
@@ -204,47 +205,44 @@ def put_statement(request, user, verb, object, target, activity_id='', result=No
         context=context,
         result=result,
     )
-    print('statement', statement)
     return send_statement(statement, timeout=timeout)
 
 # def send_statement_without_timeout(statement, success, result):
 def send_statement_without_timeout(queue):
+    """
     # avoid [Errno 5] Input/output error in action_process.start() .. sys.stderr.flush()
     if settings.DEBUG:
         sys.stderr = open(os.path.join(settings.BASE_DIR, 'logs', 'error.log'), 'a')
     else:
         sys.stdout = open(os.devnull, 'w')
         sys.stderr = open(os.devnull, 'w')
+    """
     # construct an LRS
     lrs = make_lrs()
     statement = queue.get()
     result = queue.get()
     success = queue.get()
-    try:
-        # save our statement to the remote_lrs and store the response in 'response'
-        lrs_response = lrs.save_statement(statement)
-        # print('lrs_response', lrs_response)
-        if lrs_response:
-            if lrs_response.success:
-                result = lrs_response.data
-                success = True
-                """
-                try:
-                    # retrieve our statement from the remote_lrs using the id returned in the response
-                    lrs_response = lrs.retrieve_statement(lrs_response.content.id)
-                    if lrs_response.success:
-                        result = lrs_response.content
-                        success = True
-                    else:
-                        result = lrs_response.data
-                        success = False
-                except Exception as e:
-                    result = e
-                """
-            else:
-                result = lrs_response.data
-    except Exception as e:
-        result = e
+    # save our statement to the remote_lrs and store the response in 'response'
+    lrs_response = lrs.save_statement(statement)
+    if lrs_response:
+        if lrs_response.success:
+            result = lrs_response.data
+            success = True
+            """
+            try:
+                # retrieve our statement from the remote_lrs using the id returned in the response
+                lrs_response = lrs.retrieve_statement(lrs_response.content.id)
+                if lrs_response.success:
+                    result = lrs_response.content
+                    success = True
+                else:
+                    result = lrs_response.data
+                    success = False
+            except Exception as e:
+                result = e
+            """
+        else:
+            result = lrs_response.data
     queue.put(result)
     queue.put(success)
 
@@ -258,11 +256,77 @@ def send_statement(statement, timeout=1):
     queue.put(success)
     # action_process = Process(target=send_statement_without_timeout, args=(queue,))
     action_process = Process(daemon=True, target=send_statement_without_timeout, args=(queue,))
-    # We start the process and we block for 5 seconds.
-    action_process.start()
-    action_process.join(timeout=timeout)
-    # We terminate the process.
-    result = queue.get()
-    success = queue.get()
-    action_process.terminate()
+    try:
+        # We start the process and we block for timeout seconds.
+        action_process.start()
+        action_process.join(timeout=timeout)
+        # We terminate the process.
+        result = queue.get()
+        success = queue.get()
+        action_process.terminate()
+    except:
+        pass
     return success
+
+def get_statements(query, extended=False):
+    lrs = make_lrs(extended=extended)
+    filters = {}
+    if query.get('sort', None):
+        if extended:
+            query['sort'] = [query['sort']]
+    if query.get('since', None):
+        since_iso = query['since'].isoformat()
+        if extended:
+            filters['data->stored'] = {'$gte': since_iso}
+            del query['since']
+        else:
+            query['since'] = since_iso
+    if query.get('until', None):
+        until_iso = query['until'].isoformat()
+        if extended:
+            filters['data->stored'] = {'$lte': until_iso}
+            del query['until']
+        else:
+            query['until'] = until_iso
+    if query.get('verb', None):
+        verb = query['verb']
+        verb_id = xapi_verbs[verb]['id']
+        if extended:
+            filters['data->verb->id'] = verb_id
+            del query['verb']
+        else:
+            query['verb'] = Verb(id=verb_id)
+    if query.get('activity', None):
+        object_id = query['activity']
+        if extended:
+            filters['data->object->id'] = query['activity']
+            del query['activity']
+        else:
+            query['activity'] = Activity(id=object_id)
+    if query.get('user', None):
+        mbox = 'mailto:%s' % query['user'].email
+        if extended:
+            filters['data->actor->mbox'] = mbox
+        else:
+            query['agent']  = Agent(mbox=mbox)
+        del query['user']
+    if query.get('platform', None):
+        if extended:
+            filters['data->context->platform'] = query['platform']
+        del query['platform']
+    if filters:
+        query['filters'] = filters
+    if extended:
+        lrs_response = lrs.query_statements({}, content=json.dumps(query))
+    else:
+        lrs_response = lrs.query_statements(query)
+    success = lrs_response.success
+    if success:
+        if extended:
+            statements = json.loads(lrs_response.data)['data']
+        else:
+            statements = json.loads(lrs_response.data)['statements']
+    else:
+        statements = []
+    return success, statements
+

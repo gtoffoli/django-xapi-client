@@ -1,10 +1,13 @@
 import json
 import urllib
 from datetime import datetime, timedelta
+from django.http import HttpResponseForbidden
 from django.shortcuts import render
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.contrib.auth.decorators import login_required
+
+from xapi_client.track.xapi_statements import get_statements
 
 DASHBOARD_BASE = "https://lrs.up2university.eu/dashboards/5d9f2cc11a822211045c5e75/5db710cdb8b0531954f1202c/Shareable"
 
@@ -97,3 +100,62 @@ class MakeLrsQuery(View):
             encoded_filter = urllib.parse.quote(plain_filter)
             result = '{}?filter={}'.format(DASHBOARD_BASE, encoded_filter)
         return render(request, self.template_name, {'form': form, 'result': result})
+
+def statements_search(request, template='search_statements.html', extended=False, user=None, max_actions=100, max_days=30, since=None, until=None, ascending=False,
+        verb=None, # 'viewed',
+        activity=None, # 'http://localhost:8000/project/the-universal-design/', # 'http://localhost:8000/lp/lesson-based-on-the-udl-model/',
+        related_activities=True,
+        platform='CommonS Platform'
+    ):
+    if not request.user.is_authenticated or not request.user.is_manager():
+        return HttpResponseForbidden()
+    if request.GET.get('ext', False):
+        extended = True
+    query = {}
+    if max_actions is not None:
+        query['limit'] = max_actions
+    if since:
+        query['since'] = since
+    if until:
+        query['until'] = until
+    delta_days = timedelta(days=max_days)
+    if since and until:
+        if (until-since).days > max_days:
+            since = until-delta_days
+            query['since'] = since
+    elif max_days:
+        if since:
+            until = since+delta_days
+            query['until'] = until
+        elif until:
+            since = until-delta_days
+            query['since'] = since
+        else:
+            since = datetime.now()-delta_days
+            query['since'] = since
+    if extended:
+        if ascending is not None:
+            if ascending:
+                sort_key = "id"
+            else:
+                sort_key = "-id"
+            query['sort'] = sort_key
+    if platform is not None:
+        query['platform'] = platform
+    if user is not None:
+        if not user:
+            user = request.user
+        query['user'] = user
+    if verb:
+        query['verb'] = verb
+    if activity:
+        query['activity'] = activity
+    if related_activities:
+        query['related_activities'] = 'true'
+    success, statements = get_statements(query, extended=extended)
+    var_dict = {}
+    var_dict['success'] = success
+    var_dict['extended'] = extended
+    var_dict['actor'] = user
+    var_dict['statements'] = statements
+    return render(request, template, var_dict)

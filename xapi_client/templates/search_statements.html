@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+{% load commons_tags %}
+
+{% block head_title %}
+  {% if actor %}{% blocktrans with the_actor=actor.get_display_name %}Recent statements about {{ the_actor }}{% endblocktrans %}
+  {% elif project %}{% blocktrans with the_project=project.name%}Recent statements about {{ the_project }}{% endblocktrans %}
+  {% else %}{% trans "search statements"|capfirst %}
+  {% endif %}
+{% endblock %}
+
+{% block body_class %}search statements"{% endblock %}
+
+{% block extra_head %}
+<style>
+	th, td { padding: 0 1em }
+</style>
+{% endblock extra_head %}
+
+{% block body %}
+    <section>
+        <div class="container">
+            <h1 class="marginT30">
+              {% if actor %}{% blocktrans with the_actor=actor.get_display_name %}Recent statements about {{ the_actor }}{% endblocktrans %} <span class="small">({{ actor.id }})</span>
+              {% elif project %}{% blocktrans with the_project=project.name%}Recent statements about {{ the_project }}{% endblocktrans %}
+              {% else %}{% trans "recent statements"|capfirst %}
+              {% endif %}
+            </h1>
+			{% if statements %}
+			<table id="stream" style="padding: 1em;">
+			<thead><tr class="panel-white">
+				<th>{% trans "stored" %}</th><th>{% trans "actor" %}</th><th>{% trans "verb" %}</th>
+			    <th>{% trans "activity" %}</th><th>{% trans "object" %}</th><th>{% trans "platform" %}</th>
+			</tr></thead>
+			<tbody>
+		    {% for statement in statements %}<tr>
+		        <td><nobr><small>{% if extended %}{{ statement.data.stored|slice:"0:19" }}{% else %}{{ statement.stored|slice:"0:19" }}{% endif %}</small></nobr></td>
+		        <td><nobr><small>{% if extended %}{{ statement.data.actor.name }}{% else %}{{ statement.actor.name }}{% endif %}</small></nobr></td>
+		        <td><nobr><small>{% if extended %}{{ statement.data.verb.id|split:"/"|last }}{% else %}{{ statement.verb.id|split:"/"|last }}{% endif %}</small></nobr></td>
+		        <td><nobr><small>{% if extended %}{{ statement.data.object.definition.type|split:"/"|last }}{% else %}{{ statement.object.definition.type|split:"/"|last }}{% endif %}</small></nobr></td>
+		        <td><small>{% if extended %}{{ statement.data.object.id|truncatechars:120 }}{% else %}{{ statement.object.id|truncatechars:120 }}{% endif %}</small></td>
+		        <td><nobr><small>{% if extended %}{{ statement.data.context.platform }}{% else %}{{ statement.context.platform }}{% endif %}</small></nobr></td>
+		    </tr>{% endfor %}
+			</tbody>
+			</table>
+			{% else %}
+				<div style="margin-inline-start: 1.5em;"><i>{% trans "no statements were found"|capfirst %}.</i></div>
+			{% endif %}
+        </div>
+    </section>
+{% endblock %}
