@@ -1,6 +1,8 @@
 """
 20/01/2020 - This module is here just as an example;
-it is a copy of the module with the same in the "commons" application
+it replaces the module with the same name in the "commons" application
+this is the default vocabulary (XAPI_VOCABULARIES_MODULE = None)
+you can override it setting to another value XAPI_VOCABULARIES_MODULE in settings.py
 """
 from collections import OrderedDict
 
@@ -123,6 +125,9 @@ xapi_activities = {
     },
     'membership': {'type': 'http://commonspaces.eu/activitytype/membership',
         'display': {"en-US": "membership", "it": "membro di gruppo"},
+    },
+    'role': {'type': 'http://commonspaces.eu/activitytype/role',
+        'display': {"en-US": "role in group", "it": "ruolo in gruppo"},
     },
     'discussion forum': {'type': 'http://id.tincanapi.com/activitytype/discussion',
         'display': {"en-US": "discussion forum", "it": "forum di discussione"},
@@ -315,6 +320,10 @@ xapi_verbs = {
     'rejected': {'id': 'http://activitystrea.ms/schema/1.0/reject',
         'display': {"en-US": "rejected", 'it-IT': 'ha rifiutato',},
         'description': {"en-US": "Indicates that the actor has rejected the object.",},
+    },
+    'retracted': {'id': 'http://activitystrea.ms/schema/1.0/retract',
+        'display': {"en-US": "retracted", 'it-IT': 'ha revocato',},
+        'description': {"en-US": "Indicates that the actor has retracted the object. For instance, if an actor wishes to retract a previously published activity, the object would be the previously published activity that is being retracted.",},
     },
     'searched': {'id': 'http://activitystrea.ms/schema/1.0/search',
         'display': {"en-US": "searched", 'it-IT': 'ha cercato',},
