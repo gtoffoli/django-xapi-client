@@ -296,6 +296,11 @@ def get_statements(query, extended=False):
             del query['verb']
         else:
             query['verb'] = Verb(id=verb_id)
+    if query.get('activity_type', None):
+        if extended:
+            activity_type = query['activity_type']
+            filters['data->object->definition->type'] = xapi_activities[activity_type]['type']
+            del query['activity_type']
     if query.get('activity', None):
         object_id = query['activity']
         if extended:
@@ -316,6 +321,7 @@ def get_statements(query, extended=False):
         del query['platform']
     if filters:
         query['filters'] = filters
+    print('------------ query', query)
     if extended:
         lrs_response = lrs.query_statements({}, content=json.dumps(query))
     else:

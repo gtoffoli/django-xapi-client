@@ -1,13 +1,16 @@
 import json
 import urllib
 from datetime import datetime, timedelta
+from django import forms
 from django.http import HttpResponseForbidden
 from django.shortcuts import render
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.contrib.auth.decorators import login_required
+from django.conf import settings
 
 from xapi_client.track.xapi_statements import get_statements
+from xapi_client.report.forms import FilterStatementsForm
 
 DASHBOARD_BASE = "https://lrs.up2university.eu/dashboards/5d9f2cc11a822211045c5e75/5db710cdb8b0531954f1202c/Shareable"
 
@@ -101,61 +104,111 @@ class MakeLrsQuery(View):
             result = '{}?filter={}'.format(DASHBOARD_BASE, encoded_filter)
         return render(request, self.template_name, {'form': form, 'result': result})
 
-def statements_search(request, template='search_statements.html', extended=False, user=None, max_actions=100, max_days=30, since=None, until=None, ascending=False,
-        verb=None, # 'viewed',
-        activity=None, # 'http://localhost:8000/project/the-universal-design/', # 'http://localhost:8000/lp/lesson-based-on-the-udl-model/',
-        related_activities=True,
-        platform='CommonS Platform'
-    ):
-    if not request.user.is_authenticated or not request.user.is_manager():
-        return HttpResponseForbidden()
-    if request.GET.get('ext', False):
-        extended = True
-    query = {}
-    if max_actions is not None:
-        query['limit'] = max_actions
-    if since:
-        query['since'] = since
-    if until:
-        query['until'] = until
-    delta_days = timedelta(days=max_days)
-    if since and until:
-        if (until-since).days > max_days:
-            since = until-delta_days
-            query['since'] = since
-    elif max_days:
-        if since:
-            until = since+delta_days
-            query['until'] = until
-        elif until:
-            since = until-delta_days
-            query['since'] = since
-        else:
-            since = datetime.now()-delta_days
-            query['since'] = since
-    if extended:
-        if ascending is not None:
-            if ascending:
-                sort_key = "id"
-            else:
-                sort_key = "-id"
-            query['sort'] = sort_key
-    if platform is not None:
-        query['platform'] = platform
-    if user is not None:
-        if not user:
+class StatementSearch(View):
+    form_class = FilterStatementsForm
+    template_name = 'search_statements.html'
+    user_only = False
+
+    def post(self, request):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            platforms = data['platforms']
+            platform = platforms and platforms[0] or None
+            since = data['since'] or None
+            until = data['until'] or None
+            user = data['user'] or None
+            verbs = data['verbs']
+            verb = verbs and verbs[0] or None
+            activity_types = data['activity_types']
+            activity_type = activity_types and activity_types[0] or None
+            return self.get(request, platform=platform, since=since, until=until, user=user, verb= verb, activity_type=activity_type)
+   
+    def get(self, request, extended=True, user=None, max_actions=100, max_days=30, since=None, until=None, ascending=False,
+            verb=None, # 'viewed',
+            activity=None, # 'http://localhost:8000/project/the-universal-design/', # 'http://localhost:8000/lp/lesson-based-on-the-udl-model/',
+            activity_type=None,
+            related_activities=True,
+            platform=None
+        ):
+        if not request.user.is_authenticated or not request.user.is_manager():
+            return HttpResponseForbidden()
+ 
+        if self.user_only:
             user = request.user
-        query['user'] = user
-    if verb:
-        query['verb'] = verb
-    if activity:
-        query['activity'] = activity
-    if related_activities:
-        query['related_activities'] = 'true'
-    success, statements = get_statements(query, extended=extended)
-    var_dict = {}
-    var_dict['success'] = success
-    var_dict['extended'] = extended
-    var_dict['actor'] = user
-    var_dict['statements'] = statements
-    return render(request, template, var_dict)
+        if request.GET.get('ext', False):
+            extended = True
+        query = {}
+        if max_actions is not None:
+            query['limit'] = max_actions
+        if since:
+            query['since'] = since
+        if until:
+            query['until'] = until
+        delta_days = timedelta(days=max_days)
+        if since and until:
+            if (until-since).days > max_days:
+                since = until-delta_days
+                query['since'] = since
+        #elif max_days:
+        else:
+            if since:
+                max_date = since+delta_days
+                if max_date < datetime.now().date():
+                    until = since+delta_days
+                    query['until'] = until
+            elif until:
+                since = until-delta_days
+                query['since'] = since
+            else:
+                since = datetime.now()-delta_days
+                query['since'] = since
+        if extended:
+            if ascending is not None:
+                if ascending:
+                    sort_key = "id"
+                else:
+                    sort_key = "-id"
+                query['sort'] = sort_key
+        if platform:
+            query['platform'] = platform
+        if user:
+            query['user'] = user
+        if verb:
+            query['verb'] = verb
+        if activity_type:
+            query['activity_type'] = activity_type
+        if activity:
+            query['activity'] = activity
+        if related_activities:
+            query['related_activities'] = 'true'
+        success, statements = get_statements(query, extended=extended)
+
+        initial = {
+           'user': user,
+        }
+        if platform:
+            initial['platforms'] = [platform]
+        if since:
+            initial['since'] = since
+        if until:
+            initial['until'] = until
+        if verb:
+            initial['verbs'] = [verb]
+        if activity_type:
+            initial['activity_types'] = [activity_type]
+            
+        form = self.form_class(initial=initial)
+        if self.user_only:
+            form.fields['user'].required = True
+            form.fields['user'].widget = forms.HiddenInput()
+        var_dict = {}
+        var_dict['success'] = success
+        var_dict['extended'] = extended
+        var_dict['actor'] = user
+        var_dict['statements'] = statements
+        var_dict['form'] = form
+        return render(request, self.template_name, var_dict)
+
+class MyStatements(StatementSearch):
+    user_only = True

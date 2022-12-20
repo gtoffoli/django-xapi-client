@@ -244,7 +244,7 @@ xapi_verbs = {
         'display': {"en-US": "played",},
         'description': {"en-US": "Indicates that the actor spent some time enjoying the object. For example, if the object is a video this indicates that the subject watched all or part of the video. It is a more specific form of the consume verb.",},
     },
-    'Play': {'id': 'http://activitystrea.ms/schema/1.0/play',
+    'play': {'id': 'http://activitystrea.ms/schema/1.0/play',
         'display': {"it": "ha interagito con",},
         'description': {"en-US": "Indicates that the actor spent some time enjoying the object. For example, if the object is a video this indicates that the subject watched all or part of the video. It is a more specific form of the consume verb.",},
     },
@@ -356,6 +356,12 @@ xapi_verbs = {
     'accessed': {'id': 'http://activitystrea.ms/schema/1.0/access',
         'display': {"en-US": "accessed", 'it-IT': 'ha acceduto a',},
         'description': {"en-US": "Indicates that the actor has accessed the object. For instance, a person accessing a[n online conference] room, or accessing a file.",},
+    },
+    'logged-in': {'id': 'https://w3id.org/xapi/adl/verbs/logged-in',
+        'display': { "en-US": "logged in", "it-IT": "ha fatto il login"},
+    },
+    'navigated-in': {'id': 'http://vocab.xapi.fr/verbs/navigated-in',
+        'display': {"en-US": "navigated in", "it-IT": "ha navigato in"},
     },
 }
 

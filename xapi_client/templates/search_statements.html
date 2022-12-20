@@ -1,6 +1,5 @@
 {% extends "base.html" %}
-
-{% load i18n %}
+{% load staticfiles i18n %}
 {% load commons_tags %}
 
 {% block head_title %}
@@ -13,28 +12,37 @@
 {% block body_class %}search statements"{% endblock %}
 
 {% block extra_head %}
+    {{ form.media }}
 <style>
-	th, td { padding: 0 1em }
+    .date { width: 70%; }
+    .form-group { vertical-align: top;}
+    td { inline-size: 160px; }
 </style>
 {% endblock extra_head %}
 
 {% block body %}
+<div class="panel panel-c0 text-left marginTB30">
+    <div class="panel-heading-c0 padding1020">
+      <h2 class="marginTB5">{% if user_only %}{% trans "my statements"|capfirst %}{% else %}{% trans "search statements"|capfirst %}{% endif %} {% trans "in the xAPI Learning Record Store" %}</h2>
+    </div>
+
     <section>
         <div class="container">
-            <h1 class="marginT30">
-              {% if actor %}{% blocktrans with the_actor=actor.get_display_name %}Recent statements about {{ the_actor }}{% endblocktrans %} <span class="small">({{ actor.id }})</span>
-              {% elif project %}{% blocktrans with the_project=project.name%}Recent statements about {{ the_project }}{% endblocktrans %}
+            <h3 class="marginT30">
+              {% if actor %}{% blocktrans with the_actor=actor.get_display_name %}Statements about recent activity of {{ the_actor }}{% endblocktrans %} <span class="small">({{ actor.id }})</span>
+              {% elif project %}{% blocktrans with the_project=project.name%}Statements about recent activity in {{ the_project }}{% endblocktrans %}
               {% else %}{% trans "recent statements"|capfirst %}
               {% endif %}
-            </h1>
+            </h3>
 			{% if statements %}
-			<table id="stream" style="padding: 1em;">
-			<thead><tr class="panel-white">
-				<th>{% trans "stored" %}</th><th>{% trans "actor" %}</th><th>{% trans "verb" %}</th>
+            <table class="table table-responsive table-bordered table-striped">
+			<thead><tr>
+				<th></th><th>{% trans "stored" %}</th><th>{% trans "actor" %}</th><th>{% trans "verb" %}</th>
 			    <th>{% trans "activity" %}</th><th>{% trans "object" %}</th><th>{% trans "platform" %}</th>
 			</tr></thead>
 			<tbody>
 		    {% for statement in statements %}<tr>
+                <td style="text-align: center;"><small>{{ forloop.counter }}</small></td>
 		        <td><nobr><small>{% if extended %}{{ statement.data.stored|slice:"0:19" }}{% else %}{{ statement.stored|slice:"0:19" }}{% endif %}</small></nobr></td>
 		        <td><nobr><small>{% if extended %}{{ statement.data.actor.name }}{% else %}{{ statement.actor.name }}{% endif %}</small></nobr></td>
 		        <td><nobr><small>{% if extended %}{{ statement.data.verb.id|split:"/"|last }}{% else %}{{ statement.verb.id|split:"/"|last }}{% endif %}</small></nobr></td>
@@ -49,4 +57,69 @@
 			{% endif %}
         </div>
     </section>
+
+    <section>
+        <h4 class="paddingL20 demiBold text-center">{% trans "Set filter" %}</h4>
+        <form action="" method="post" id="filter_statements">{% csrf_token %}
+            <fieldset class="padding1020">
+            {% for field in form.hidden_fields %}{{ field }}{% endfor %}
+            {% if form.errors %}
+                {% if form.non_field_errors %}
+                    <div class="txt-error demiBold">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+            {% endif %}
+
+			<table class="table table-responsive">
+            <tbody style="vertical-align: top;">
+			<tr>
+  			   <td width="30%"><div class="form-group">
+                  <label for="{{ form.platforms.id_for_label }}"> {{ form.platforms.label|capfirst}}</label><br>
+                  <span class="txt-error">{{ form.platforms.errors }}</span>{{ form.platforms }}
+                  <small id="{{ form.platforms.name }}helpBlock" class="help-block">{{ form.platforms.help_text }}</small>
+  				</div></td>
+              <td width="35%"><div class="form-group">
+                  <label for="{{ form.since.id_for_label }}"> {{ form.since.label|capfirst}}</label><br>
+                  <span class="txt-error">{{ form.since.errors }}</span>{{ form.since }}
+                  <small id="{{ form.since.name }}helpBlock" class="help-block">{{ form.since.help_text }}</small>
+  				</div></td>
+              <td width="35%"><div class="form-group">
+                  <label for="{{ form.until.id_for_label }}"> {{ form.until.label|capfirst}}</label><br>
+                  <span class="txt-error">{{ form.until.errors }}</span>{{ form.until }}
+                  <small id="{{ form.until.name }}helpBlock" class="help-block">{{ form.until.help_text }}</small>
+  				</div></td>
+			</tr>
+            <tr>
+              <td width="30%"><div class="form-group">
+                  <label for="{{ form.user.id_for_label }}"> {{ form.user.label|capfirst}}</label><br>
+                  <span class="txt-error">{{ form.user.errors }}</span>{{ form.user }}
+                  <small id="{{ form.user.name }}helpBlock" class="help-block">{{ form.user.help_text }}</small>
+              </div></td>
+              <td width="35%"><div class="form-group">
+                  <label for="{{ form.verbs.id_for_label }}"> {{ form.verbs.label|capfirst}}</label><br>
+                  <span class="txt-error">{{ form.verbs.errors }}</span>{{ form.verbs }}
+                  <small id="{{ form.verbs.name }}helpBlock" class="help-block">{{ form.verbs.help_text }}</small>
+              </div></td>
+              <td width="35%"><div class="form-group">
+                      <label for="{{ form.activity_types.id_for_label }}"> {{ form.activity_types.label|capfirst}}</label><br>
+                      <span class="txt-error">{{ form.activity_types.errors }}</span>{{ form.activity_types }}
+                      <small id="{{ form.activity_types.name }}helpBlock" class="help-block">{{ form.activity_types.help_text }}</small>
+              </div></td>
+            </tr>
+            </tbody>
+			</table>
+            </fieldset>
+
+            <div class="panel-footer-c0 padding1020">
+                <input type="submit" name="refresh" value="" style="visibility: hidden;" />
+                <button type="submit" name="send" id="send" value="send" class="btn btn-default">{% trans "search statements"|capfirst %} &raquo;</button>
+            </div>
+        </form>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_script %}
+    <script src="{% static "js/bootstrap-datetimepicker.js" %}"></script>
 {% endblock %}
