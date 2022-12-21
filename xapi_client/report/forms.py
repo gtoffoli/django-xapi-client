@@ -8,15 +8,7 @@ from dal import autocomplete
 
 from xapi_client.xapi_vocabularies import xapi_verbs, xapi_activities
 
-PLATFORM_CHOICES = [
-    # ('any', _('any')),
-    ('CommonS Platform', 'CommonSpaces'),
-    ('Moodle', 'Moodle'),
-    ('Jupyter', 'SWAN'),
-    ('CS devel', 'CS devel'),
-    # ('EarMaster', 'EarMaster'),
-]
-
+PLATFORM_CHOICES = settings.XAPI_PLATFORMS
 VERB_CHOICES = [(verb, verb) for verb in sorted(list(xapi_verbs.keys()))]
 ACTIVITY_CHOICES = [(act, act) for act in sorted(list(xapi_activities.keys()))]
 
