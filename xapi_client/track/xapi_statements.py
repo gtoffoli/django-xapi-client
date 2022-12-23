@@ -268,6 +268,14 @@ def send_statement(statement, timeout=1):
         pass
     return success
 
+def get_statement(statement_id):
+    lrs = make_lrs()
+    lrs_response = lrs.retrieve_statement(statement_id)
+    if lrs_response.success:
+        return lrs_response.success, lrs_response.content
+    else:
+        return lrs_response.success, ''
+
 def get_statements(query, extended=False):
     lrs = make_lrs(extended=extended)
     filters = {}

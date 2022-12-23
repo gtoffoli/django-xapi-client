@@ -42,7 +42,7 @@
 			</tr></thead>
 			<tbody>
 		    {% for statement in statements %}<tr>
-                <td style="text-align: center;"><small>{{ forloop.counter }}</small></td>
+                <td style="text-align: center;"><a href="javascript:window.open('/xapi/statement_detail/{% if extended %}{{ statement.data.id }}{% else %}{{ statement.id }}{% endif %}/', '{{ statement.id }}', 'fullscreen=no', 'toolbar=no', 'status=no', 'location=no', 'top=24', 'left=24')"><small>{{ forloop.counter }}</small></a></td>
 		        <td><nobr><small>{% if extended %}{{ statement.data.stored|slice:"0:19" }}{% else %}{{ statement.stored|slice:"0:19" }}{% endif %}</small></nobr></td>
 		        <td><nobr><small>{% if extended %}{{ statement.data.actor.name }}{% else %}{{ statement.actor.name }}{% endif %}</small></nobr></td>
 		        <td><nobr><small>{% if extended %}{{ statement.data.verb.id|split:"/"|last }}{% else %}{{ statement.verb.id|split:"/"|last }}{% endif %}</small></nobr></td>
@@ -113,7 +113,8 @@
 
             <div class="panel-footer-c0 padding1020">
                 <input type="submit" name="refresh" value="" style="visibility: hidden;" />
-                <button type="submit" name="send" id="send" value="send" class="btn btn-default">{% trans "search statements"|capfirst %} &raquo;</button>
+                <button type="submit" name="search" id="search" value="search" class="btn btn-default">{% trans "search statements"|capfirst %} &raquo;</button>
+                <button type="submit" name="export" id="export" value="export" class="btn btn-default">{% trans "export statements"|capfirst %} &raquo;</button>
             </div>
         </form>
     </section>

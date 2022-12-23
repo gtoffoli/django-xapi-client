@@ -2,14 +2,13 @@ import json
 import urllib
 from datetime import datetime, timedelta
 from django import forms
-from django.http import HttpResponseForbidden
+from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import render
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.contrib.auth.decorators import login_required
-from django.conf import settings
 
-from xapi_client.track.xapi_statements import get_statements
+from xapi_client.track.xapi_statements import get_statement, get_statements
 from xapi_client.report.forms import FilterStatementsForm
 
 DASHBOARD_BASE = "https://lrs.up2university.eu/dashboards/5d9f2cc11a822211045c5e75/5db710cdb8b0531954f1202c/Shareable"
@@ -104,6 +103,15 @@ class MakeLrsQuery(View):
             result = '{}?filter={}'.format(DASHBOARD_BASE, encoded_filter)
         return render(request, self.template_name, {'form': form, 'result': result})
 
+def statement_detail(request, statement_id):
+    template_name = 'statement_detail.html'
+    success, statement = get_statement(statement_id)
+    if success:
+        statement = json.loads(statement.to_json())
+    var_dict = { 'statement_id': statement_id, 'success': success, 'statement': statement }
+    var_dict['EMBEDDED'] = True
+    return render(request, template_name, var_dict)
+
 class StatementSearch(View):
     form_class = FilterStatementsForm
     template_name = 'search_statements.html'
@@ -122,9 +130,13 @@ class StatementSearch(View):
             verb = verbs and verbs[0] or None
             activity_types = data['activity_types']
             activity_type = activity_types and activity_types[0] or None
-            return self.get(request, platform=platform, since=since, until=until, user=user, verb= verb, activity_type=activity_type)
+            export = request.POST.get('export', False)
+            return self.get(request, export=export, platform=platform, since=since, until=until, user=user, verb= verb, activity_type=activity_type)
    
-    def get(self, request, extended=True, user=None, max_actions=100, max_days=30, since=None, until=None, ascending=False,
+    def get(self, request, export=False, extended=True, ascending=False,
+            max_actions=100, max_days=30,
+            since=None, until=None,
+            user=None,
             verb=None, # 'viewed',
             activity=None, # 'http://localhost:8000/project/the-universal-design/', # 'http://localhost:8000/lp/lesson-based-on-the-udl-model/',
             activity_type=None,
@@ -208,7 +220,15 @@ class StatementSearch(View):
         var_dict['actor'] = user
         var_dict['statements'] = statements
         var_dict['form'] = form
-        return render(request, self.template_name, var_dict)
+        if export:
+            data = json.dumps(statements)
+            date = datetime.now().isoformat()
+            file_name = 'xapi-statements-{}'.format(date)
+            response = HttpResponse(data, content_type='text/plain; charset=utf-8')
+            response['Content-Disposition'] = 'attachment; filename="%s"' % file_name
+            return response
+        else:
+            return render(request, self.template_name, var_dict)
 
 class MyStatements(StatementSearch):
     user_only = True

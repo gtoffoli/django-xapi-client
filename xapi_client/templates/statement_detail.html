@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load staticfiles i18n %}
+{% load commons_tags %}
+
+{% block head_title %}
+  {% trans "statement detail"|capfirst %}
+{% endblock %}
+
+
+{% block nav %}
+{% endblock %}
+
+{% block body_base %}
+  <h3>{% trans "detail of xAPI statement with id"|capfirst %} {{ statement_id }}</h3>
+
+  <div>
+  {% if success %}
+    <pre>{{ statement|pprint }}</pre>
+  {% else %}
+    {% trans "an issue was found in accessing the LRS"|capfirst %}
+  {% endif %}
+  </div>
+{% endblock %}
