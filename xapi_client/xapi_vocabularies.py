@@ -116,6 +116,7 @@ xapi_activities = {
     },
     'collection': {'type': 'http://activitystrea.ms/schema/1.0/collection',
         'display': {"en-US": "collection", "it": "raccolta"},
+        'description': {"en-US": "Represents a generic collection of objects of any type. For instance, a collection of files like a folder; a collection of texts, like a corpus; a collection of photos like an album.",},
     },
     'document': {'type': 'http://activitystrea.ms/schema/1.0/file',
         'display': {"en-US": "document", "it": "documento"},
@@ -227,6 +228,10 @@ xapi_verbs = {
     'read': {'id': 'http://activitystrea.ms/schema/1.0/read',
         'display': {"en-US": "read",},
         'description': {"en-US": "Indicates that the actor read the object. This is typically applicable for objects representing printed or written content, such as a book, a message or a comment. It is a more specific than consumed, experienced and played verbs.",},
+    },
+    'analyzed': {'id': 'http://commonspaces.eu/verb/analyzed',
+        'display': {"en-US": "analyzed", "it-IT": "ha analizzato"},
+        'description': {"en-US": "Indicates that the actor observed the object in depth to catch its internal structure, possibly with the aid of a tool. This is typically applicable for objects with textual content, such as a book, a message or a comment. It is a more specific than read and experienced verbs.",},
     },
     'bookmarked': {'id': 'http://id.tincanapi.com/verb/bookmarked',
         'display': {"en-US": "bookmarked",},
@@ -393,12 +398,12 @@ xapi_recipes = OrderedDict([
     }),
     ('CommonSpaces', { # see https://www.commonspaces.it, or its alias https://cs.up2university.eu
         'activity_types': ['user profile', 'project', 'membership', 'folder', 'document', 'discussion forum', 'discussion topic', 'forum post', 'resource repository', 'oer', 'web page', 'oer rating', 'learning path', 'learning unit', 'article', 'private message', 'meeting',],
-        'verbs': ['searched', 'viewed', 'played', 'commented', 'bookmarked', 'created', 'deleted', 'edited', 'submitted', 'accepted', 'approved', 'rejected', 'sent', 'accessed',],
+        'verbs': ['searched', 'viewed', 'played', 'commented', 'bookmarked', 'analyzed', 'created', 'deleted', 'edited', 'submitted', 'accepted', 'approved', 'rejected', 'sent', 'accessed',],
         'comment': 'this recipe mainly concerns formal and non-formal education',
     }),
 ])
 
-xapi_contextual_activities = ['project', 'course', 'learning path', 'folder', 'collection', 'resource repository', 'event', 'place',]
+xapi_contextual_activities = ['project', 'course', 'learning path', 'folder', '', 'resource repository', 'event', 'place',]
 
 xapi_language_codes = [
     ('en', 'English'),
