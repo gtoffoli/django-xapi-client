@@ -47,7 +47,7 @@
 		        <td><nobr><small>{% if extended %}{{ statement.data.actor.name }}{% else %}{{ statement.actor.name }}{% endif %}</small></nobr></td>
 		        <td><nobr><small>{% if extended %}{{ statement.data.verb.id|split:"/"|last }}{% else %}{{ statement.verb.id|split:"/"|last }}{% endif %}</small></nobr></td>
 		        <td><nobr><small>{% if extended %}{{ statement.data.object.definition.type|split:"/"|last }}{% else %}{{ statement.object.definition.type|split:"/"|last }}{% endif %}</small></nobr></td>
-		        <td><small>{% if extended %}{{ statement.data.object.id|truncatechars:120 }}{% else %}{{ statement.object.id|truncatechars:120 }}{% endif %}</small></td>
+		        <td><small>{% if extended %}{{ statement.data.object.id|truncatechars:80 }}{% else %}{{ statement.object.id|truncatechars:80 }}{% endif %}</small></td>
 		        <td><nobr><small>{% if extended %}{{ statement.data.context.platform }}{% else %}{{ statement.context.platform }}{% endif %}</small></nobr></td>
 		    </tr>{% endfor %}
 			</tbody>

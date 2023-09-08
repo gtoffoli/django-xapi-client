@@ -223,8 +223,8 @@ class StatementSearch(View):
         if export:
             data = json.dumps(statements)
             date = datetime.now().isoformat()
-            file_name = 'xapi-statements-{}'.format(date)
-            response = HttpResponse(data, content_type='text/plain; charset=utf-8')
+            file_name = 'xapi-statements-{}.json'.format(date)
+            response = HttpResponse(data, content_type='application/json; charset=utf-8')
             response['Content-Disposition'] = 'attachment; filename="%s"' % file_name
             return response
         else:
