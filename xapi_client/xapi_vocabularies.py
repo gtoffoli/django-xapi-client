@@ -408,7 +408,7 @@ xapi_recipes = OrderedDict([
     }),
 ])
 
-xapi_contextual_activities = ['project', 'course', 'learning path', 'folder', '', 'resource repository', 'event', 'place',]
+xapi_contextual_activities = ['project', 'course', 'learning path', 'folder', 'resource repository', 'event', 'place',]
 
 xapi_language_codes = [
     ('en', 'English'),
