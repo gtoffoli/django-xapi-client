@@ -125,16 +125,17 @@ class StatementSearch(View):
             platform = platforms and platforms[0] or None
             since = data['since'] or None
             until = data['until'] or None
+            limit = data['limit'] or 100
             user = data['user'] or None
             verbs = data['verbs']
             verb = verbs and verbs[0] or None
             activity_types = data['activity_types']
             activity_type = activity_types and activity_types[0] or None
             export = request.POST.get('export', False)
-            return self.get(request, export=export, platform=platform, since=since, until=until, user=user, verb= verb, activity_type=activity_type)
+            return self.get(request, export=export, platform=platform, since=since, until=until, limit=limit, user=user, verb= verb, activity_type=activity_type)
    
     def get(self, request, export=False, extended=True, ascending=False,
-            max_actions=100, max_days=30,
+            limit=100,
             since=None, until=None,
             user=None,
             verb=None, # 'viewed',
@@ -151,37 +152,17 @@ class StatementSearch(View):
         if request.GET.get('ext', False):
             extended = True
         query = {}
-        if max_actions is not None:
-            query['limit'] = max_actions
+        query['limit'] = limit
         if since:
             query['since'] = since
         if until:
             query['until'] = until
-        delta_days = timedelta(days=max_days)
-        if since and until:
-            if (until-since).days > max_days:
-                since = until-delta_days
-                query['since'] = since
-        #elif max_days:
-        else:
-            if since:
-                max_date = since+delta_days
-                if max_date < datetime.now().date():
-                    until = since+delta_days
-                    query['until'] = until
-            elif until:
-                since = until-delta_days
-                query['since'] = since
-            else:
-                since = datetime.now()-delta_days
-                query['since'] = since
         if extended:
-            if ascending is not None:
-                if ascending:
-                    sort_key = "id"
-                else:
-                    sort_key = "-id"
-                query['sort'] = sort_key
+            if ascending:
+                sort_key = ['data->stored']
+            else:
+                sort_key = ['-data->stored']
+            query['sort'] = sort_key
         if platform:
             query['platform'] = platform
         if user:
@@ -197,7 +178,7 @@ class StatementSearch(View):
         success, statements = get_statements(query, extended=extended)
 
         initial = {
-           'user': user,
+           'user': user, 'limit': limit,
         }
         if platform:
             initial['platforms'] = [platform]
@@ -211,10 +192,11 @@ class StatementSearch(View):
             initial['activity_types'] = [activity_type]
             
         form = self.form_class(initial=initial)
+        var_dict = {}
         if self.user_only:
+            var_dict['user_only'] = True
             form.fields['user'].required = True
             form.fields['user'].widget = forms.HiddenInput()
-        var_dict = {}
         var_dict['success'] = success
         var_dict['extended'] = extended
         var_dict['actor'] = user

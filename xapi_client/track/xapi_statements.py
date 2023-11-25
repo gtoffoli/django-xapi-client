@@ -279,9 +279,6 @@ def get_statement(statement_id):
 def get_statements(query, extended=False):
     lrs = make_lrs(extended=extended)
     filters = {}
-    if query.get('sort', None):
-        if extended:
-            query['sort'] = [query['sort']]
     if query.get('since', None):
         since_iso = query['since'].isoformat()
         if extended:
@@ -292,7 +289,7 @@ def get_statements(query, extended=False):
     if query.get('until', None):
         until_iso = query['until'].isoformat()
         if extended:
-            filters['data->stored'] = {'$lte': until_iso}
+            filters['data->timestamp'] = {'$lte': until_iso}
             del query['until']
         else:
             query['until'] = until_iso

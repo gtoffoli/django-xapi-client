@@ -11,6 +11,7 @@ from xapi_client.xapi_vocabularies import xapi_verbs, xapi_activities
 PLATFORM_CHOICES = settings.XAPI_PLATFORMS
 VERB_CHOICES = [(verb, verb) for verb in sorted(list(xapi_verbs.keys()))]
 ACTIVITY_CHOICES = [(act, act) for act in sorted(list(xapi_activities.keys()))]
+LIMIT_CHOICES = [(100, '100'), (300, '300'), (1000, '1000'), (3000, '3000'), (10000, '10000')]
 
 dateTimeOptions = {
 'minView': 2,
@@ -33,6 +34,7 @@ class FilterStatementsForm(forms.Form):
     platforms = forms.MultipleChoiceField(required=False, choices=PLATFORM_CHOICES, label=_('learning platform'), widget=forms.SelectMultiple(attrs={'class':'form-control', 'size': 3,}))
     since = forms.DateField(required=False, label=_('since'), input_formats=['%d/%m/%Y'], widget=DateTimeWidget(bootstrap_version=3, options=dateTimeOptions, attrs={'id': 'since', 'class':'form-control',}), help_text=_('start day, included; format: dd/mm/yyyy'))
     until = forms.DateField(required=False, label=_('until'), input_formats=['%d/%m/%Y'], widget=DateTimeWidget(bootstrap_version=3, options=dateTimeOptions, attrs={'id': 'until', 'class':'form-control',}), help_text=_('end day, excluded; format: dd/mm/yyyy'))
+    limit = forms.ChoiceField(required=False, choices=LIMIT_CHOICES, label=_('max statements'), widget=forms.Select(attrs={'class':'form-control'}))
     user = forms.ModelChoiceField(required=False, label=_("actor"), queryset=User.objects.filter(is_active=True), widget=autocomplete.ModelSelect2(url='/user-fullname-autocomplete/'))
     verbs = forms.MultipleChoiceField(required=False, choices=VERB_CHOICES, label=_('verbs'), widget=forms.SelectMultiple(attrs={'class':'form-control', 'size': 6,}))
     activity_types = forms.MultipleChoiceField(required=False, label=_('activity types'), choices=ACTIVITY_CHOICES, widget=forms.SelectMultiple(attrs={'class':'form-control', 'size': 6,}))

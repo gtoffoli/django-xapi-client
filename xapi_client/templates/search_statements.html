@@ -74,11 +74,19 @@
 			<table class="table table-responsive">
             <tbody style="vertical-align: top;">
 			<tr>
-  			   <td width="30%"><div class="form-group">
-                  <label for="{{ form.platforms.id_for_label }}"> {{ form.platforms.label|capfirst}}</label><br>
-                  <span class="txt-error">{{ form.platforms.errors }}</span>{{ form.platforms }}
-                  <small id="{{ form.platforms.name }}helpBlock" class="help-block">{{ form.platforms.help_text }}</small>
-  				</div></td>
+              <td width="30%"><div class="form-group">
+                  <label for="{{ form.limit.id_for_label }}"> {{ form.limit.label|capfirst}}</label><br>
+                  <span class="txt-error">{{ form.limit.errors }}</span>{{ form.limit }}
+                  <small id="{{ form.limit.name }}helpBlock" class="help-block">{{ form.limit.help_text }}</small>
+              </div>
+              {% if not user_only %}
+                <div class="form-group">
+                  <label for="{{ form.user.id_for_label }}"> {{ form.user.label|capfirst}}</label><br>
+                  <span class="txt-error">{{ form.user.errors }}</span>{{ form.user }}
+                  <small id="{{ form.user.name }}helpBlock" class="help-block">{{ form.user.help_text }}</small>
+                </div>
+              {% endif %}
+              </td>
               <td width="35%"><div class="form-group">
                   <label for="{{ form.since.id_for_label }}"> {{ form.since.label|capfirst}}</label><br>
                   <span class="txt-error">{{ form.since.errors }}</span>{{ form.since }}
@@ -91,20 +99,20 @@
   				</div></td>
 			</tr>
             <tr>
-              <td width="30%"><div class="form-group">
-                  <label for="{{ form.user.id_for_label }}"> {{ form.user.label|capfirst}}</label><br>
-                  <span class="txt-error">{{ form.user.errors }}</span>{{ form.user }}
-                  <small id="{{ form.user.name }}helpBlock" class="help-block">{{ form.user.help_text }}</small>
-              </div></td>
+  			   <td width="30%"><div class="form-group">
+                  <label for="{{ form.platforms.id_for_label }}"> {{ form.platforms.label|capfirst}}</label><br>
+                  <span class="txt-error">{{ form.platforms.errors }}</span>{{ form.platforms }}
+                  <small id="{{ form.platforms.name }}helpBlock" class="help-block">{{ form.platforms.help_text }}</small>
+  				</div></td>
               <td width="35%"><div class="form-group">
                   <label for="{{ form.verbs.id_for_label }}"> {{ form.verbs.label|capfirst}}</label><br>
                   <span class="txt-error">{{ form.verbs.errors }}</span>{{ form.verbs }}
                   <small id="{{ form.verbs.name }}helpBlock" class="help-block">{{ form.verbs.help_text }}</small>
               </div></td>
               <td width="35%"><div class="form-group">
-                      <label for="{{ form.activity_types.id_for_label }}"> {{ form.activity_types.label|capfirst}}</label><br>
-                      <span class="txt-error">{{ form.activity_types.errors }}</span>{{ form.activity_types }}
-                      <small id="{{ form.activity_types.name }}helpBlock" class="help-block">{{ form.activity_types.help_text }}</small>
+                  <label for="{{ form.activity_types.id_for_label }}"> {{ form.activity_types.label|capfirst}}</label><br>
+                  <span class="txt-error">{{ form.activity_types.errors }}</span>{{ form.activity_types }}
+                  <small id="{{ form.activity_types.name }}helpBlock" class="help-block">{{ form.activity_types.help_text }}</small>
               </div></td>
             </tr>
             </tbody>
