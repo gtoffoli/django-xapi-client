@@ -33,6 +33,9 @@ XAPI_LANGUAGE = settings.LANGUAGE_CODE
 
 EXTENDED = False
 
+import logging
+logger = logging.getLogger('tracking')
+
 def get_name(obj):
     return hasattr(obj, '__str__') and obj.__str__() or ''
 
@@ -118,7 +121,7 @@ def put_statement(request, user, verb, object, target, activity_id='', result=No
             # account=AgentAccount(name=str(user.pk), home_page='https://www.commonspaces.eu')
         )
     except:
-        print('put_statement exception')
+        logger.debug('put_statement exception')
         return False
 
     # construct the verb of the statement
@@ -227,7 +230,7 @@ def send_statement_without_timeout(queue):
     try:
         lrs_response = lrs.save_statement(statement)
     except:
-        print('send_statement_without_timeout exception')
+        logger.debug('send_statement_without_timeout exception')
         lrs_response = None
     if lrs_response:
         if lrs_response.success:
@@ -270,7 +273,7 @@ def send_statement(statement, timeout=1):
         success = queue.get()
         action_process.terminate()
     except:
-        print('send_statement exception')
+        logger.debug('send_statement exception')
     return success
 
 def get_statement(statement_id):
@@ -331,7 +334,7 @@ def get_statements(query, extended=False):
         del query['platform']
     if filters:
         query['filters'] = filters
-    print('------------ query', query)
+    logger.debug('------------ query', query)
     if extended:
         lrs_response = lrs.query_statements({}, content=json.dumps(query))
     else:
