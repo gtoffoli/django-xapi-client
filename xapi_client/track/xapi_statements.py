@@ -251,6 +251,7 @@ def send_statement_without_timeout(queue):
             """
         else:
             result = lrs_response.data
+            logger.debug(result)
     queue.put(result)
     queue.put(success)
 
