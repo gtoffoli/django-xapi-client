@@ -89,24 +89,27 @@ def get_context_grouping(request, target):
     }
 
 def make_lrs(extended=False):
-    version = settings.LRS_VERSION
-    endpoint = settings.LRS_ENDPOINT
-    if extended:
-        endpoint = endpoint.replace('std', 'ext')
- 
-    if settings.LRS_USERNAME and settings.LRS_PASSWORD:
-        lrs = RemoteLRS(
-            version = version,
-            endpoint = endpoint,
-            username = settings.LRS_USERNAME,
-            password = settings.LRS_PASSWORD
-        )
-    else:
-        lrs = RemoteLRS(
-            version = version,
-            endpoint = endpoint,
-            auth = settings.LRS_AUTH,
-        )
+    try:
+        version = settings.LRS_VERSION
+        endpoint = settings.LRS_ENDPOINT
+        if extended:
+            endpoint = endpoint.replace('std', 'ext')
+     
+        if settings.LRS_USERNAME and settings.LRS_PASSWORD:
+            lrs = RemoteLRS(
+                version = version,
+                endpoint = endpoint,
+                username = settings.LRS_USERNAME,
+                password = settings.LRS_PASSWORD
+            )
+        else:
+            lrs = RemoteLRS(
+                version = version,
+                endpoint = endpoint,
+                auth = settings.LRS_AUTH,
+            )
+    except Exception as e:
+        logger.debug('make_lrs exception', str(e))
     return lrs
 
 # def put_statement(request, user, verb, object, target, language=XAPI_LANGUAGE, timeout=1):
