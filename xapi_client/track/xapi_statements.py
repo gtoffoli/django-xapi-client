@@ -123,8 +123,8 @@ def put_statement(request, user, verb, object, target, activity_id='', result=No
             mbox='mailto:%s' % user.email,
             # account=AgentAccount(name=str(user.pk), home_page='https://www.commonspaces.eu')
         )
-    except:
-        logger.debug('put_statement exception')
+    except Exception as e:
+        logger.debug('put_statement exception', e)
         return False
 
     # construct the verb of the statement
@@ -232,8 +232,8 @@ def send_statement_without_timeout(queue):
     # save our statement to the remote_lrs and store the response in 'response'
     try:
         lrs_response = lrs.save_statement(statement)
-    except:
-        logger.debug('send_statement_without_timeout exception')
+    except Exception as e:
+        logger.debug('send_statement_without_timeout exception', e)
         lrs_response = None
     if lrs_response:
         if lrs_response.success:
@@ -276,8 +276,8 @@ def send_statement(statement, timeout=1):
         result = queue.get()
         success = queue.get()
         action_process.terminate()
-    except:
-        logger.debug('send_statement exception')
+    except Exception as e:
+        logger.debug('send_statement exception', str(e))
     return success
 
 def get_statement(statement_id):
