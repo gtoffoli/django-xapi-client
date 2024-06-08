@@ -112,8 +112,10 @@ def make_lrs(extended=False):
         logger.debug('make_lrs exception', str(e))
     return lrs
 
+PUT_TIMEOUT = 3 # seconds; was 1
+
 # def put_statement(request, user, verb, object, target, language=XAPI_LANGUAGE, timeout=1):
-def put_statement(request, user, verb, object, target, activity_id='', result=None, response=None, score=None, language=XAPI_LANGUAGE, timeout=1):
+def put_statement(request, user, verb, object, target, activity_id='', result=None, response=None, score=None, language=XAPI_LANGUAGE, timeout=PUT_TIMEOUT):
     # IMPORTANT: do not confound the result argument of put_statement with local variables with same name in this module!
     # construct the actor of the statement
     # IMPORTANT - account is OK but cannot coexist with mbox or other way of uniquely identifying the actor
@@ -273,9 +275,13 @@ def send_statement(statement, timeout=1):
         action_process.start()
         action_process.join(timeout=timeout)
         # We terminate the process.
+        if action_process.is_alive():
+            action_process.terminate()
+            logger.debug('send_statement timeout (', timeout, ') expired')
+            return success
         result = queue.get()
         success = queue.get()
-        action_process.terminate()
+        # action_process.terminate()
     except Exception as e:
         logger.debug('send_statement exception', str(e))
     return success
